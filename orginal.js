@@ -44,23 +44,25 @@ class windowManager {
         }
         return tab.id;
       }));
-      if (tabs.length > biggestCount) {
-        biggest = windowObj;
-        biggestCount = tabs.length;
+      if (tabs.length < 2) {
+        return
       }
+      tabs.map((tab) => {
+        browser.windows.create({tabId: tab.id})
+      })
     });
     await Promise.all(promises);
-    const repinTabs = await Promise.all(repin);
-    windows.forEach((windowObj) => {
-      if (windowObj === biggest) {
-        return;
-      }
-      browser.tabs.move(windowMap.get(windowObj), {index: -1, windowId: biggest.id});
-    });
-    repinTabs.forEach((tab) => {
-      browser.tabs.update(tab.id, {pinned: true});
-    });
-    this.calculateContextMenu();
+    // const repinTabs = await Promise.all(repin);
+    // windows.forEach((windowObj) => {
+    //   if (windowObj === biggest) {
+    //     return;
+    //   }
+    //   browser.tabs.move(windowMap.get(windowObj), {index: -1, windowId: biggest.id});
+    // });
+    // repinTabs.forEach((tab) => {
+    //   browser.tabs.update(tab.id, {pinned: true});
+    // });
+    // this.calculateContextMenu();
   }
 };
 
