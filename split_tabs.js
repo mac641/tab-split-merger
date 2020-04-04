@@ -25,6 +25,10 @@ class windowManager {
     });
   }
 
+  async askForSplitPermission(numberOfTabs) {
+
+  }
+
   async calculateContextMenu() {
     const windows = await this.getCurrentWindows();
     const id = 'split-tabs';
@@ -32,14 +36,33 @@ class windowManager {
     // remove contextMenu with id 'split-tabs'
     browser.contextMenus.remove(id);
 
-    // if at least one window exists, create contextMenu 'Split all tabs into windows'
-    // TODO: check for amount of tabs instead of amount of windows
-    if (windows.length >= 1) {
-      browser.contextMenus.create({
-        id,
-        title: 'Split all tabs into windows',
-        contexts: ['all', 'tab', 'windows'],
+    // get all tabs
+    let querriedTabs = browser.tabs.query({});
+    querriedTabs.then(createContextMenus, onError);
+
+    // TODO: is there a better way? how to avoid forEach loops wrapped in map?
+    function createContextMenus(tabs) {
+      windows.map((window) => {
+        // check how many tabs exist in each window
+        let tabByWindowCount = 0;
+        tabs.forEach(tab => {
+          if (tab.windowId === window.id) tabByWindowCount += 1;
+        });
+
+        // if at least two tabs exist in one window, create contextMenu
+        if (tabByWindowCount > 1) {
+          browser.contextMenus.create({
+            id,
+            title: "Split all tabs into windows",
+            contexts: ["all", "tab"],
+          });
+        }
       });
+    }
+
+    // TODO: test onError
+    function onError(error) {
+      window.alert(error.message);
     }
   }
 
