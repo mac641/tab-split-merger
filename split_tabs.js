@@ -1,7 +1,7 @@
 class windowManager {
   constructor() {
     browser.contextMenus.onClicked.addListener(() => {
-      this.merge();
+      this.split();
     });
     browser.windows.onFocusChanged.addListener(() => {
       this.calculateContextMenu();
@@ -30,17 +30,17 @@ class windowManager {
     }
   }
 
-  async merge() {
+  async split() {
     const windowMap = new Map();
-    const windows = await this.getCurrentWindows();
+    const windows = await this.getCurrentWindows(); // Get all currently opened browser windows
     let repin = [];
-    const promises = windows.map(async function (windowObj) {
+    const promises = windows.map(async function (windowObj) { // for each of the windows,
       const tabs = await browser.tabs.query({ windowId: windowObj.id });
       windowMap.set(
         windowObj,
         tabs.map((tab) => {
-          if (tab.pinned) {
-            repin.push(browser.tabs.update(tab.id, { pinned: false }));
+          if (tab.pinned) { // add the tabs of the window in an array 
+            repin.push(browser.tabs.update(tab.id, { pinned: false })); // if tab is pinned, add to pinned list and unpin it to make it moveable
           }
           return tab.id;
         })
@@ -48,7 +48,7 @@ class windowManager {
       if (tabs.length < 2) {
         return;
       }
-      tabs.map((tab) => {
+      tabs.map((tab) => { // for each tab open a new window
         browser.windows.create({ tabId: tab.id });
       });
     });
