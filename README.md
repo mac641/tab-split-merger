@@ -1,6 +1,6 @@
 ---
-author: Marcel Arndt, Kilian Drechsler
-title: tabs-to-windows
+author: Marcel, Kilian
+title: Tabs to windows
 ---
 
 ## Description
