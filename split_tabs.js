@@ -25,8 +25,10 @@ class windowManager {
     });
   }
 
-  async askForSplitPermission(numberOfTabs) {
-
+  async askForSplitPermission(numberOfTabs, windows) {
+    const retProm = new Promise;
+    const result = window.confirm(`Do you really want to open ${numberOfTabs - windows} additional windows?`);
+    return retProm.resolve(result);
   }
 
   async calculateContextMenu() {
