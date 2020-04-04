@@ -2,6 +2,7 @@
 author: Marcel Arndt, Kilian Drechsler
 title: tabs-to-windows
 ---
+
 ## Description
 
 Split tabs into multiple windows.
