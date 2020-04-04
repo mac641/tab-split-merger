@@ -19,12 +19,12 @@ class windowManager {
 
   async calculateContextMenu() {
     const windows = await this.getCurrentWindows();
-    const id = "merge-windows";
+    const id = "split-tabs";
     browser.contextMenus.remove(id);
-    if (windows.length > 1) {
+    if (windows.length >= 1) {
       browser.contextMenus.create({
         id,
-        title: "Merge all windows",
+        title: "Split all tabs into windows",
         contexts: ["all", "tab"],
       });
     }
