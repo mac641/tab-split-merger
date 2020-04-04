@@ -1,8 +1,9 @@
 {
     "manifest_version": 2,
     "name": "Split all tabs to windows",
-    "version": "0.1",
+    "version": "1.0",
     "description": "Splits multiple tabs into separate windows with each window containing only one tab.",
+    "homepage_url": "https://github.com/mac641/tabs-to-windows",
     "permissions": [
         "tabs",
         "contextMenus"
