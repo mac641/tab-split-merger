@@ -6,10 +6,10 @@ class windowManager {
     });
 
     // register claculateContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
-    browser.windows.onFocusChanged.addListener(() => {
+    browser.windows.onFocusChanged.addListener((info) => {
       this.calculateContextMenu();
     });
-    this.calculateContextMenu();
+    this.calculateContextMenu(info);
   }
 
   async getCurrentWindows() {
@@ -26,12 +26,13 @@ class windowManager {
   }
 
   async askForSplitPermission(numberOfTabs, windows) {
+    // TODO: add config entry to enable configuration when prompting for permission should be enabled
     const retProm = new Promise;
     const result = window.confirm(`Do you really want to open ${numberOfTabs - windows} additional windows?`);
     return retProm.resolve(result);
   }
 
-  async calculateContextMenu() {
+  async calculateContextMenu(info) {
     const windows = await this.getCurrentWindows();
     const id = 'split-tabs';
     
@@ -44,10 +45,11 @@ class windowManager {
 
     // TODO: is there a better way? how to avoid forEach loops wrapped in map?
     function createContextMenus(tabs) {
+      // TODO: exchange map with for loop and check if context menu already exists
       windows.map((window) => {
         // check how many tabs exist in each window
         let tabByWindowCount = 0;
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
           if (tab.windowId === window.id) tabByWindowCount += 1;
         });
 
