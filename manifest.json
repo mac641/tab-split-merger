@@ -8,6 +8,6 @@
         "contextMenus"
     ],
     "background": {
-        "scripts": ["original.js"]
+        "scripts": ["split_tabs.js"]
     }
 }
