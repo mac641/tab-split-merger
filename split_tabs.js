@@ -25,16 +25,9 @@ class windowManager {
     });
   }
 
-  async askForSplitPermission(numberOfTabs, windows) {
-    // TODO: add config entry to enable configuration when prompting for permission should be enabled
-    const retProm = new Promise;
-    const result = window.confirm(`Do you really want to open ${numberOfTabs - windows} additional windows?`);
-    return retProm.resolve(result);
-  }
-
   async calculateContextMenu() {
     const windows = await this.getCurrentWindows();
-    const id = 'split-tabs';
+    const id = "split-tabs";
 
     // remove contextMenu with id 'split-tabs'
     browser.contextMenus.remove(id);
@@ -66,21 +59,58 @@ class windowManager {
 
     // TODO: test onError
     function onError(error) {
-      window.alert(error.message);
+      browser.tabs.executeScript({ code: `window.alert(${error}.message)` });
     }
+  }
+
+  async askForSplitPermission() {
+    // TODO: add config entry to enable configuration when prompting for permission should be enabled
+
+    // get windows and assign their amount
+    // TODO: check if there's a way to assign length without using two variables
+    const windows = await this.getCurrentWindows();
+    const windowCount = windows.length;
+
+    // get tabs and assign their amount
+    const tabs = await browser.tabs.query({}).then((value) => value);
+    const numberOfTabs = tabs.length;
+
+    // Inject code into current active tab because background are unable to access JavaScript API of browser (including window)
+    const activeTab = browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const confirm = browser.tabs.executeScript(activeTab.id, {
+      code: `window.confirm(
+        \`Do you really want to open ${
+          numberOfTabs - windowCount
+        } additional windows?\`
+      )`,
+    });
+
+    // Return promise including user choice whether or not to split
+    return confirm;
   }
 
   async split() {
     const windowMap = new Map();
     const windows = await this.getCurrentWindows(); // Get all currently opened browser windows
     let repin = [];
-    const promises = windows.map(async function (windowObj) { // for each of the windows,
-      const tabs = await browser.tabs.query({ windowId: windowObj.id });
+    const promises = windows.map(async function (windowObj) {
+      // for each window get all tabs
+      const tabs = await browser.tabs.query({
+        windowId: windowObj.id,
+      });
       windowMap.set(
         windowObj,
         tabs.map((tab) => {
-          if (tab.pinned) { // add the tabs of the window in an array 
-            repin.push(browser.tabs.update(tab.id, { pinned: false })); // if tab is pinned, add to pinned list and unpin it to make it moveable
+          if (tab.pinned) {
+            // add the tabs of the window in an array
+            repin.push(
+              browser.tabs.update(tab.id, {
+                pinned: false,
+              })
+            ); // if tab is pinned, add to pinned list and unpin it to make it moveable
           }
           return tab.id;
         })
@@ -88,10 +118,17 @@ class windowManager {
       if (tabs.length < 2) {
         return;
       }
-      tabs.map((tab) => { // for each tab open a new window
+    });
+
+    await this.askForSplitPermission().then((value) => {
+      // TODO: Make tabs accessible in whole 'split()' function
+      if (!value[0]) return;
+      tabs.map((tab) => {
+        // for each tab open a new window
         browser.windows.create({ tabId: tab.id });
       });
     });
+
     await Promise.all(promises);
   }
 }
