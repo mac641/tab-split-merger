@@ -1,15 +1,24 @@
 class windowManager {
   constructor() {
+    // Add main menu item
+    browser.contextMenus.create({
+      id: "windowManager",
+      title: "Window Manager",
+      contexts: ["all", "tab"],
+    });
+
     // register onClicked Listener on split() function
-    browser.contextMenus.onClicked.addListener(() => {
-      this.split();
+    browser.contextMenus.onClicked.addListener((info, tab) => {
+      if (info.menuItemId === "split-tabs") {
+        this.split();
+      }
     });
 
     // register claculateContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
     browser.windows.onFocusChanged.addListener(() => {
-      this.calculateContextMenu();
+      this.calculateSplitTabsContextMenu();
     });
-    this.calculateContextMenu();
+    this.calculateSplitTabsContextMenu();
   }
 
   async getCurrentWindows() {
@@ -25,7 +34,7 @@ class windowManager {
     });
   }
 
-  async calculateContextMenu() {
+  async calculateSplitTabsContextMenu() {
     const windows = await this.getCurrentWindows();
     const id = "split-tabs";
 
@@ -53,6 +62,7 @@ class windowManager {
             id,
             title: "Split all tabs into windows",
             contexts: ["all", "tab"],
+            parentId: "windowManager",
           });
         }
       });
