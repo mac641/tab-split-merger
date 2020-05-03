@@ -1,24 +1,47 @@
 class windowManager {
   constructor() {
-    // Add main menu item
-    browser.contextMenus.create({
-      id: "windowManager",
-      title: "Window Manager",
-      contexts: ["all", "tab"],
-    });
+    // init contextMenus and config
+    this.init();
+    this.calculateSplitTabsContextMenu();
 
-    // register onClicked Listener on split() function
-    browser.contextMenus.onClicked.addListener((info, tab) => {
+    // register onClicked Listener on split() / askForThresholdConfig() function
+    browser.contextMenus.onClicked.addListener((info) => {
       if (info.menuItemId === "split-tabs") {
         this.split();
+      } else if (info.menuItemId === "configuration") {
+        this.askForThresholdConfig();
       }
     });
 
-    // register claculateContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
+    // register claculateSplitTabsContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
     browser.windows.onFocusChanged.addListener(() => {
       this.calculateSplitTabsContextMenu();
     });
-    this.calculateSplitTabsContextMenu();
+  }
+
+  async init() {
+    // Add main menu item
+    browser.contextMenus.remove("windowManager");
+    browser.contextMenus.create({
+      id: "windowManager",
+      title: "Window Manager",
+      contexts: ["all", "tab"]
+    });
+
+    // Add configuration sub menu item
+    browser.contextMenus.remove("configuration");
+    browser.contextMenus.create({
+      id: "configuration",
+      title: "Set confirmation threshold",
+      contexts: ["all", "tab"],
+      parentId: "windowManager"
+    });
+
+    // set default configuration
+    const config = (await this.getConfiguration()).threshold;
+    if (config === null || config === undefined || config === 2) {
+      this.setConfiguration(2);
+    }
   }
 
   async getCurrentWindows() {
@@ -34,6 +57,46 @@ class windowManager {
     });
   }
 
+  async getConfiguration() {
+    const configItems = await browser.storage.local.get().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
+
+    return configItems;
+  }
+
+  async setConfiguration(threshold) {
+    await browser.storage.local
+      .set({
+        threshold: threshold
+      })
+      .then(
+        (value) => {},
+        (error) => {
+          console.error(error);
+        }
+      );
+  }
+
+  async askForThresholdConfig() {
+    const activeTab = await browser.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+    const configPrompt = await browser.tabs
+      .executeScript(activeTab.id, {
+        code: `window.prompt("Type a number which specifies the amount of windows to be ignored before asking for confirmation", ${
+          (await this.getConfiguration()).threshold
+        })`
+      })
+      .then((value) => value);
+
+    if (configPrompt[0] !== null) {
+      this.setConfiguration(Number(configPrompt[0]));
+    }
+  }
+
   async calculateSplitTabsContextMenu() {
     const windows = await this.getCurrentWindows();
     const id = "split-tabs";
@@ -44,7 +107,7 @@ class windowManager {
     // get all tabs and run asynchronous function 'createContextMenus' if Promise is fulfilled
     await browser.tabs
       .query({})
-      .then(createContextMenus, (error) => console.error(error.message));
+      .then(createContextMenus, (error) => console.error(error));
 
     // TODO: is there a better way? how to avoid forEach loops wrapped in map?
     async function createContextMenus(tabs) {
@@ -62,7 +125,7 @@ class windowManager {
             id,
             title: "Split all tabs into windows",
             contexts: ["all", "tab"],
-            parentId: "windowManager",
+            parentId: "windowManager"
           });
         }
       });
@@ -71,6 +134,7 @@ class windowManager {
 
   async askForSplitPermission() {
     // TODO: add config entry to enable configuration when prompting for permission should be enabled
+    const confirmationThreshold = (await this.getConfiguration()).threshold;
 
     // get windows and assign their amount
     const windowCount = (await this.getCurrentWindows()).length;
@@ -80,17 +144,21 @@ class windowManager {
       .query({})
       .then((value) => value.length);
 
+    if (numberOfTabs < confirmationThreshold) {
+      return Promise.resolve([true]);
+    }
+
     // Inject code into current active tab because background scripts are unable to access JavaScript API of browser window (including window.confirm, window.alert, etc.)
     const activeTab = await browser.tabs.query({
       active: true,
-      currentWindow: true,
+      currentWindow: true
     });
     const confirm = await browser.tabs.executeScript(activeTab.id, {
       code: `window.confirm(
         \`You are going to open ${
           numberOfTabs - windowCount
         } additional windows.\nAre you sure?\`
-      )`,
+      )`
     });
 
     // Return promise including user choice whether or not to split
@@ -101,7 +169,7 @@ class windowManager {
     // ask for confirmation before splitting tabs into windows
     const isSplit = await this.askForSplitPermission().then(
       (value) => value[0],
-      (error) => console.error(error.message)
+      (error) => console.error(error)
     );
 
     if (!isSplit) {
@@ -114,7 +182,7 @@ class windowManager {
     const promises = windows.map(async (windowObj) => {
       // for each window get all tabs
       const tabs = await browser.tabs.query({
-        windowId: windowObj.id,
+        windowId: windowObj.id
       });
       windowMap.set(
         windowObj,
@@ -123,7 +191,7 @@ class windowManager {
             // add the tabs of the window in an array
             repin.push(
               browser.tabs.update(tab.id, {
-                pinned: false,
+                pinned: false
               })
             ); // if tab is pinned, add to pinned list and unpin it to make it moveable
           }
