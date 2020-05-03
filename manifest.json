@@ -6,6 +6,6 @@
   "homepage_url": "https://github.com/mac641/tabs-to-windows",
   "permissions": ["tabs", "contextMenus", "activeTab"],
   "background": {
-    "scripts": ["split_tabs.js"]
+    "scripts": ["windowManager.js"]
   }
 }
