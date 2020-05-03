@@ -133,7 +133,7 @@ class windowManager {
   }
 
   async askForSplitPermission() {
-    // TODO: add config entry to enable configuration when prompting for permission should be enabled
+    // get current confirmationTreshold
     const confirmationThreshold = (await this.getConfiguration()).threshold;
 
     // get windows and assign their amount
