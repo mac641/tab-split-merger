@@ -13,7 +13,7 @@ class windowManager {
       }
     });
 
-    // register claculateSplitTabsContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
+    // register calculateSplitTabsContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
     browser.windows.onFocusChanged.addListener(() => {
       this.calculateSplitTabsContextMenu();
     });
@@ -74,6 +74,7 @@ class windowManager {
     return configItems;
   }
 
+  // TODO: take Object as parameter for easier editing with multiple config entries
   async setConfiguration(threshold) {
     await browser.storage.local
       .set({
@@ -100,6 +101,7 @@ class windowManager {
       })
       .then((value) => value);
 
+    // TODO: check if NaN
     if (configPrompt[0] !== null) {
       this.setConfiguration(Number(configPrompt[0]));
     }
@@ -220,6 +222,7 @@ class windowManager {
 
     // Solve all Promises and repin previously unpinned tabs
     await Promise.all(promises);
+    // TODO: probably add configuration option
     const repinTabs = await Promise.all(repin);
     repinTabs.forEach((tab) => {
       browser.tabs.update(tab.id, { pinned: true });
