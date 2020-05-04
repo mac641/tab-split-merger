@@ -1,0 +1,3 @@
+[submodule "web-ext-types"]
+	path = web-ext-types
+	url = https://github.com/kelseasy/web-ext-types.git
