@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
         "typeRoots": ["@types", "web-ext-types"],
+        "module": "amd",
+        "target": "es6"
   }
 }
