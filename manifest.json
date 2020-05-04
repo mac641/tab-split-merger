@@ -4,7 +4,7 @@
   "version": "0.1",
   "description": "Splits multiple tabs into separate windows with each window containing only one tab.",
   "homepage_url": "https://github.com/mac641/tabs-to-windows",
-  "permissions": ["tabs", "contextMenus", "activeTab", "storage"],
+  "permissions": ["tabs", "menus", "activeTab", "storage"],
   "background": {
     "scripts": ["windowManager.js"]
   }
