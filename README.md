@@ -1,6 +1,6 @@
 ---
 author: Marcel Arndt, Kilian Drechsler
-title: Tabs to windows
+title: Window Manager
 ---
 
 ## Description
