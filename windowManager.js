@@ -4,11 +4,12 @@ class windowManager {
     this.managerId = "windowManager";
     this.configId = "configuration";
     this.splitId = "splitTabs";
+    this.mergeId = "mergeWindows";
     this.windows = [];
 
     // init menus and config
     this.init();
-    this.calculateSplitTabsContextMenu();
+    this.calculateTemporaryMenu();
 
     // register split() / askForThresholdConfig() on onClicked event of menus
     browser.menus.onClicked.addListener((info) => {
@@ -16,26 +17,18 @@ class windowManager {
         this.split();
       } else if (info.menuItemId === this.configId) {
         this.askForThresholdConfig();
+      } else if (info.menuItemId === this.mergeId) {
+        this.merge();
       }
     });
 
     // register calculateSplitTabsContextMenu() on onFocusChanged event
     browser.windows.onFocusChanged.addListener(() => {
-      this.getCurrentWindows().then(
-        (value) => (this.windows = value),
-        (error) => console.error(error)
-      );
-      this.calculateSplitTabsContextMenu();
+      this.calculateTemporaryMenu();
     });
   }
 
   async init() {
-    // Get current windows and assign to class attribute
-    this.getCurrentWindows().then(
-      (value) => (this.windows = value),
-      (error) => console.error(error)
-    );
-
     // Add constant menu items
     browser.menus.remove(this.managerId);
     browser.menus.create({
@@ -154,6 +147,15 @@ class windowManager {
     return confirm;
   }
 
+  async calculateTemporaryMenu() {
+    await this.getCurrentWindows().then(
+      (value) => (this.windows = value),
+      (error) => console.error(error)
+    );
+    this.calculateSplitTabsContextMenu();
+    this.calculateMergeContextMenu();
+  }
+
   async calculateSplitTabsContextMenu() {
     // remove contextMenu with id 'split-tabs'
     browser.menus.remove(this.splitId);
@@ -187,6 +189,18 @@ class windowManager {
     );
   }
 
+  async calculateMergeContextMenu() {
+    browser.menus.remove(this.mergeId);
+    if (this.windows.length > 1) {
+      browser.menus.create({
+        id: this.mergeId,
+        title: "Merge all windows",
+        contexts: ["all", "tab"],
+        parentId: this.managerId
+      });
+    }
+  }
+
   async split() {
     // ask for confirmation before splitting tabs into windows
     let isSplit = false;
@@ -200,44 +214,81 @@ class windowManager {
     }
 
     // set up variables and get all firefox windows
-    const windowMap = new Map();
     let repin = [];
     const promises = this.windows.map(async (windowObj) => {
       // for each window get all tabs
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
       });
-      windowMap.set(
-        windowObj,
-        tabs.map((tab) => {
-          // if tab is pinned, add to pinned list and unpin it to make it moveable
-          if (tab.pinned) {
-            // push pinned tabs into array for repinning later on
-            repin.push(
-              browser.tabs.update(tab.id, {
-                pinned: false
-              })
-            );
-          }
-          return tab.id;
-        })
-      );
+      tabs.map((tab) => {
+        // if tab is pinned, add to pinned list and unpin it to make it moveable
+        if (tab.pinned) {
+          // push pinned tabs into array for repinning later on
+          repin.push(
+            browser.tabs.update(tab.id, {
+              pinned: false
+            })
+          );
+        }
+        return tab.id;
+      });
+      // create new window for each tab
       if (tabs.length < 2) {
         return;
       }
       tabs.map((tab) => {
-        // create new window for each tab
-        browser.windows.create({ tabId: tab.id });
+        browser.windows.create({
+          tabId: tab.id
+        });
       });
     });
 
     // Solve all Promises and repin previously unpinned tabs
-    Promise.all(promises);
+    await Promise.all(promises);
     // TODO: add configuration option
     const repinTabs = await Promise.all(repin);
     repinTabs.forEach((tab) => {
       browser.tabs.update(tab.id, { pinned: true });
     });
+    this.calculateTemporaryMenu();
+  }
+
+  async merge() {
+    const windowMap = new Map();
+    let biggestCount = 0;
+    let biggest = null;
+    let repin = [];
+    const promises = this.windows.map(async function (windowObj) {
+      const tabs = await browser.tabs.query({ windowId: windowObj.id });
+      windowMap.set(
+        windowObj,
+        tabs.map((tab) => {
+          if (tab.pinned) {
+            repin.push(browser.tabs.update(tab.id, { pinned: false }));
+          }
+          return tab.id;
+        })
+      );
+      if (tabs.length > biggestCount) {
+        biggest = windowObj;
+        biggestCount = tabs.length;
+      }
+    });
+    await Promise.all(promises);
+    const repinTabs = await Promise.all(repin);
+    this.windows.forEach((windowObj) => {
+      if (windowObj === biggest) {
+        return;
+      }
+      browser.tabs.move(windowMap.get(windowObj), {
+        index: -1,
+        windowId: biggest.id
+      });
+    });
+    repinTabs.forEach((tab) => {
+      browser.tabs.update(tab.id, { pinned: true });
+    });
+    this.calculateTemporaryMenu();
   }
 }
 
