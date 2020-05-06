@@ -57,10 +57,8 @@ class windowManager {
   }
 
   async getCurrentWindows() {
-    // get current window as window.Window object wrapped in Promise
+    // get current window as window.Window object and all windows as window.Window array
     const currentWindow = await browser.windows.getCurrent();
-
-    // get all windows as window.Window array wrapped in Promise
     const windows = await browser.windows.getAll({});
 
     // Remove incognito windows and return
@@ -143,7 +141,6 @@ class windowManager {
       )`
     });
 
-    // Return promise including user choice whether or not to split
     return confirm;
   }
 
@@ -157,21 +154,18 @@ class windowManager {
   }
 
   async calculateSplitTabsContextMenu() {
-    // remove contextMenu with id 'split-tabs'
     browser.menus.remove(this.splitId);
 
-    // get all tabs and run fulfilled arrow function if Promise is resolved
+    // check how many tabs exist and create split menu if there are at least 2
     browser.tabs.query({}).then(
       (tabs) => {
         // TODO: is there a better way? how to avoid forEach loops wrapped in map?
         this.windows.map((window) => {
-          // check how many tabs exist in each window
           let tabByWindowCount = 0;
           tabs.forEach((tab) => {
             if (tab.windowId === window.id) tabByWindowCount += 1;
           });
 
-          // if at least two tabs exist in one window, remove contextMenu with id 'split-tabs' and create new contextMenu
           if (tabByWindowCount > 1) {
             browser.menus.remove(this.splitId);
             browser.menus.create({
@@ -213,17 +207,14 @@ class windowManager {
       return;
     }
 
-    // set up variables and get all firefox windows
+    // For each window get all tabs, map them to current window object and push pinned tabs into repin array after unpinning
     let repin = [];
     const promises = this.windows.map(async (windowObj) => {
-      // for each window get all tabs
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
       });
       tabs.map((tab) => {
-        // if tab is pinned, add to pinned list and unpin it to make it moveable
         if (tab.pinned) {
-          // push pinned tabs into array for repinning later on
           repin.push(
             browser.tabs.update(tab.id, {
               pinned: false
@@ -232,7 +223,6 @@ class windowManager {
         }
         return tab.id;
       });
-      // create new window for each tab
       if (tabs.length < 2) {
         return;
       }
@@ -258,8 +248,12 @@ class windowManager {
     let biggestCount = 0;
     let biggest = null;
     let repin = [];
+
+    // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
     const promises = this.windows.map(async function (windowObj) {
-      const tabs = await browser.tabs.query({ windowId: windowObj.id });
+      const tabs = await browser.tabs.query({
+        windowId: windowObj.id
+      });
       windowMap.set(
         windowObj,
         tabs.map((tab) => {
@@ -274,6 +268,8 @@ class windowManager {
         biggestCount = tabs.length;
       }
     });
+
+    // Solve all Promises and repin previously unpinned tabs
     await Promise.all(promises);
     const repinTabs = await Promise.all(repin);
     this.windows.forEach((windowObj) => {
