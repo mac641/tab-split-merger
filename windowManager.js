@@ -1,65 +1,76 @@
 class windowManager {
   constructor() {
+    // Introduce class attributes
+    this.managerId = "windowManager";
+    this.configId = "configuration";
+    this.splitId = "splitTabs";
+    this.windows = [];
+
     // init menus and config
     this.init();
     this.calculateSplitTabsContextMenu();
 
-    // register onClicked Listener on split() / askForThresholdConfig() function
+    // register split() / askForThresholdConfig() on onClicked event of menus
     browser.menus.onClicked.addListener((info) => {
-      if (info.menuItemId === "split-tabs") {
+      if (info.menuItemId === this.splitId) {
         this.split();
-      } else if (info.menuItemId === "configuration") {
+      } else if (info.menuItemId === this.configId) {
         this.askForThresholdConfig();
       }
     });
 
-    // register calculateSplitTabsContextMenu() on windows.onFocusChanged() -> event is fired when currently focused window was changed
+    // register calculateSplitTabsContextMenu() on onFocusChanged event
     browser.windows.onFocusChanged.addListener(() => {
+      this.getCurrentWindows().then(
+        (value) => (this.windows = value),
+        (error) => console.error(error)
+      );
       this.calculateSplitTabsContextMenu();
     });
   }
 
   async init() {
-    const managerId = "windowManager";
-    const configId = "configuration";
+    // Get current windows and assign to class attribute
+    this.getCurrentWindows().then(
+      (value) => (this.windows = value),
+      (error) => console.error(error)
+    );
 
-    // Add main menu item
-    browser.menus.remove(managerId);
+    // Add constant menu items
+    browser.menus.remove(this.managerId);
     browser.menus.create({
-      id: managerId,
+      id: this.managerId,
       title: "Window Manager",
       contexts: ["all", "tab"]
     });
-
-    // Add configuration sub menu item
-    browser.menus.remove(configId);
+    browser.menus.remove(this.configId);
     browser.menus.create({
-      id: configId,
+      id: this.configId,
       title: "Set confirmation threshold",
       contexts: ["all", "tab"],
-      parentId: managerId
+      parentId: this.managerId
     });
 
     // set default configuration
     const config = (await this.getConfiguration()).threshold;
-    const defaultThreshold = 2;
+    const defaultThreshold = { threshold: 2 };
     if (
       config === null ||
       config === undefined ||
-      config === defaultThreshold
+      config === defaultThreshold.threshold
     ) {
       this.setConfiguration(defaultThreshold);
     }
   }
 
   async getCurrentWindows() {
-    // asynchronous function that returns Promise containing the currently focused window as windows.Window object
+    // get current window as window.Window object wrapped in Promise
     const currentWindow = await browser.windows.getCurrent();
 
-    // asynchronous function containing all open windows as an array of windows.Window objects wrapped in a Promise
+    // get all windows as window.Window array wrapped in Promise
     const windows = await browser.windows.getAll({});
 
-    // apply filter to remove incognito windows from array
+    // Remove incognito windows and return
     return windows.filter((windowObj) => {
       return windowObj.incognito === currentWindow.incognito;
     });
@@ -74,21 +85,17 @@ class windowManager {
     return configItems;
   }
 
-  // TODO: take Object as parameter for easier editing with multiple config entries
   async setConfiguration(threshold) {
-    await browser.storage.local
-      .set({
-        threshold: threshold
-      })
-      .then(
-        () => {},
-        (error) => {
-          console.error(error);
-        }
-      );
+    browser.storage.local.set(threshold).then(
+      () => {},
+      (error) => {
+        console.error(error);
+      }
+    );
   }
 
   async askForThresholdConfig() {
+    // Get activeTab and ask for new threshold config value
     const activeTab = await browser.tabs.query({
       active: true,
       currentWindow: true
@@ -99,25 +106,35 @@ class windowManager {
           (await this.getConfiguration()).threshold
         })`
       })
-      .then((value) => value);
+      .then(
+        (value) => value,
+        () => {}
+      );
 
-    // TODO: check if NaN
-    if (configPrompt[0] !== null) {
-      this.setConfiguration(Number(configPrompt[0]));
+    // Parse config string to Number and guard illegal values
+    const configNumber = Number(configPrompt[0]);
+    if (
+      configPrompt[0] !== null &&
+      configPrompt[0] !== undefined &&
+      configNumber !== null &&
+      configNumber !== undefined &&
+      configNumber !== NaN
+    ) {
+      this.setConfiguration({ threshold: configNumber });
     }
   }
 
   async askForSplitPermission() {
-    // get current confirmationTreshold
+    // get confirmationThreshold, windowCount, numberOfTabs and activeTab
     const confirmationThreshold = (await this.getConfiguration()).threshold;
-
-    // get windows and assign their amount
-    const windowCount = (await this.getCurrentWindows()).length;
-
-    // get tabs and assign their amount
+    const windowCount = this.windows.length;
     const numberOfTabs = await browser.tabs
       .query({})
       .then((value) => value.length);
+    const activeTab = await browser.tabs.query({
+      active: true,
+      currentWindow: true
+    });
 
     // if numberOfTabs < confirmationThreshold return true wrapped in Array wrapped in Promise -> same as confirm does below
     if (numberOfTabs < confirmationThreshold) {
@@ -125,10 +142,6 @@ class windowManager {
     }
 
     // Inject js code into current active tab because background scripts are unable to access JavaScript API of browser window (including window.confirm, window.alert, etc.)
-    const activeTab = await browser.tabs.query({
-      active: true,
-      currentWindow: true
-    });
     const confirm = await browser.tabs.executeScript(activeTab.id, {
       code: `window.confirm(
         \`You are going to open ${
@@ -142,44 +155,45 @@ class windowManager {
   }
 
   async calculateSplitTabsContextMenu() {
-    const windows = await this.getCurrentWindows();
-    const id = "split-tabs";
-
     // remove contextMenu with id 'split-tabs'
-    browser.menus.remove(id);
+    browser.menus.remove(this.splitId);
 
-    // get all tabs and run asynchronous function 'createmenus' if Promise is fulfilled
-    await browser.tabs
-      .query({})
-      .then(createmenus, (error) => console.error(error));
-
-    // TODO: is there a better way? how to avoid forEach loops wrapped in map?
-    async function createmenus(tabs) {
-      windows.map((window) => {
-        // check how many tabs exist in each window
-        let tabByWindowCount = 0;
-        tabs.forEach((tab) => {
-          if (tab.windowId === window.id) tabByWindowCount += 1;
-        });
-
-        // if at least two tabs exist in one window, remove contextMenu with id 'split-tabs' and create new contextMenu
-        if (tabByWindowCount > 1) {
-          browser.menus.remove(id);
-          browser.menus.create({
-            id,
-            title: "Split all tabs into windows",
-            contexts: ["all", "tab"],
-            parentId: "windowManager"
+    // get all tabs and run fulfilled arrow function if Promise is resolved
+    browser.tabs.query({}).then(
+      (tabs) => {
+        // TODO: is there a better way? how to avoid forEach loops wrapped in map?
+        this.windows.map((window) => {
+          // check how many tabs exist in each window
+          let tabByWindowCount = 0;
+          tabs.forEach((tab) => {
+            if (tab.windowId === window.id) tabByWindowCount += 1;
+            console.log(tab.windowId);
           });
-        }
-      });
-    }
+          console.log(window.id);
+
+          // if at least two tabs exist in one window, remove contextMenu with id 'split-tabs' and create new contextMenu
+          if (tabByWindowCount > 1) {
+            browser.menus.remove(this.splitId);
+            browser.menus.create({
+              id: this.splitId,
+              title: "Split all tabs into windows",
+              contexts: ["all", "tab"],
+              parentId: this.managerId
+            });
+          }
+        });
+      },
+      (error) => {
+        return console.error(error);
+      }
+    );
   }
 
   async split() {
     // ask for confirmation before splitting tabs into windows
-    const isSplit = await this.askForSplitPermission().then(
-      (value) => value[0],
+    let isSplit = false;
+    await this.askForSplitPermission().then(
+      (value) => (isSplit = value[0]),
       (error) => console.error(error)
     );
 
@@ -189,9 +203,8 @@ class windowManager {
 
     // set up variables and get all firefox windows
     const windowMap = new Map();
-    const windows = await this.getCurrentWindows();
     let repin = [];
-    const promises = windows.map(async (windowObj) => {
+    const promises = this.windows.map(async (windowObj) => {
       // for each window get all tabs
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
@@ -201,7 +214,7 @@ class windowManager {
         tabs.map((tab) => {
           // if tab is pinned, add to pinned list and unpin it to make it moveable
           if (tab.pinned) {
-            // add the tabs of the window in an array
+            // push pinned tabs into array for repinning later on
             repin.push(
               browser.tabs.update(tab.id, {
                 pinned: false
@@ -214,15 +227,15 @@ class windowManager {
       if (tabs.length < 2) {
         return;
       }
-      tabs.map(async (tab) => {
-        // for each tab open a new window
+      tabs.map((tab) => {
+        // create new window for each tab
         browser.windows.create({ tabId: tab.id });
       });
     });
 
     // Solve all Promises and repin previously unpinned tabs
-    await Promise.all(promises);
-    // TODO: probably add configuration option
+    Promise.all(promises);
+    // TODO: add configuration option
     const repinTabs = await Promise.all(repin);
     repinTabs.forEach((tab) => {
       browser.tabs.update(tab.id, { pinned: true });
