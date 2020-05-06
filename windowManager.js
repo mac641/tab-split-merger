@@ -2,9 +2,11 @@ class windowManager {
   constructor() {
     // Introduce class attributes
     this.managerId = "windowManager";
-    this.configId = "configuration";
+    this.thresholdId = "configConfirmationThreshold";
     this.splitId = "splitTabs";
     this.mergeId = "mergeWindows";
+    this.repinId = "configRepinTabs";
+    this.isRepinTabs = true;
     this.windows = [];
 
     // init menus and config
@@ -15,15 +17,30 @@ class windowManager {
     browser.menus.onClicked.addListener((info) => {
       if (info.menuItemId === this.splitId) {
         this.split();
-      } else if (info.menuItemId === this.configId) {
+      } else if (info.menuItemId === this.thresholdId) {
         this.askForThresholdConfig();
       } else if (info.menuItemId === this.mergeId) {
         this.merge();
+      } else if (info.menuItemId === this.repinId) {
+        if (info.checked === true) {
+          this.isRepinTabs = false;
+        } else {
+          this.isRepinTabs = true;
+        }
       }
     });
 
     // register calculateSplitTabsContextMenu() on onFocusChanged event
     browser.windows.onFocusChanged.addListener(() => {
+      this.calculateTemporaryMenu();
+    });
+    browser.tabs.onCreated.addListener(() => {
+      this.calculateTemporaryMenu();
+    });
+    browser.tabs.onAttached.addListener(() => {
+      this.calculateTemporaryMenu();
+    });
+    browser.tabs.onRemoved.addListener(() => {
       this.calculateTemporaryMenu();
     });
   }
@@ -36,10 +53,26 @@ class windowManager {
       title: "Window Manager",
       contexts: ["all", "tab"]
     });
-    browser.menus.remove(this.configId);
+    browser.menus.remove(this.thresholdId);
     browser.menus.create({
-      id: this.configId,
+      id: this.thresholdId,
       title: "Set confirmation threshold",
+      contexts: ["all", "tab"],
+      parentId: this.managerId
+    });
+    browser.menus.remove(this.repinId);
+    browser.menus.create({
+      id: this.repinId,
+      type: "checkbox",
+      title: "Repin tabs",
+      contexts: ["all", "tab"],
+      checked: true,
+      parentId: this.managerId
+    });
+    browser.menus.remove("separator-1");
+    browser.menus.create({
+      id: "separator-1",
+      type: "separator",
       contexts: ["all", "tab"],
       parentId: this.managerId
     });
@@ -195,6 +228,7 @@ class windowManager {
     }
   }
 
+  // TODO: split / merge -> reduce code duplication when implementing in separate class
   async split() {
     // ask for confirmation before splitting tabs into windows
     let isSplit = false;
@@ -207,39 +241,68 @@ class windowManager {
       return;
     }
 
-    // For each window get all tabs, map them to current window object and push pinned tabs into repin array after unpinning
-    let repin = [];
-    const promises = this.windows.map(async (windowObj) => {
-      const tabs = await browser.tabs.query({
-        windowId: windowObj.id
-      });
-      tabs.map((tab) => {
-        if (tab.pinned) {
-          repin.push(
-            browser.tabs.update(tab.id, {
-              pinned: false
-            })
-          );
+    const windows = this.windows;
+
+    if (this.isRepinTabs) {
+      splitRepinTabs(windows);
+    } else {
+      splitIgnorePinnedTabs(windows);
+    }
+
+    async function splitRepinTabs(windows) {
+      // For each window get all tabs, map them to current window object and push pinned tabs into repin array after unpinning
+      let repin = [];
+      const promises = windows.map(async (windowObj) => {
+        const tabs = await browser.tabs.query({
+          windowId: windowObj.id
+        });
+        tabs.map((tab) => {
+          if (tab.pinned) {
+            repin.push(
+              browser.tabs.update(tab.id, {
+                pinned: false
+              })
+            );
+          }
+          return tab.id;
+        });
+        if (tabs.length < 2) {
+          return;
         }
-        return tab.id;
-      });
-      if (tabs.length < 2) {
-        return;
-      }
-      tabs.map((tab) => {
-        browser.windows.create({
-          tabId: tab.id
+        tabs.map((tab) => {
+          browser.windows.create({
+            tabId: tab.id
+          });
         });
       });
-    });
 
-    // Solve all Promises and repin previously unpinned tabs
-    await Promise.all(promises);
-    // TODO: add configuration option
-    const repinTabs = await Promise.all(repin);
-    repinTabs.forEach((tab) => {
-      browser.tabs.update(tab.id, { pinned: true });
-    });
+      // Solve all Promises and repin previously unpinned tabs
+      await Promise.all(promises);
+      // TODO: add configuration option
+      const repinTabs = await Promise.all(repin);
+      repinTabs.forEach((tab) => {
+        browser.tabs.update(tab.id, { pinned: true });
+      });
+    }
+
+    async function splitIgnorePinnedTabs(windows) {
+      const promises = windows.map(async (windowObj) => {
+        const tabs = await browser.tabs.query({
+          windowId: windowObj.id
+        });
+        if (tabs.length < 2) {
+          return;
+        }
+        tabs.map((tab) => {
+          browser.windows.create({
+            tabId: tab.id
+          });
+        });
+      });
+
+      // Solve all Promises and repin previously unpinned tabs
+      await Promise.all(promises);
+    }
     this.calculateTemporaryMenu();
   }
 
