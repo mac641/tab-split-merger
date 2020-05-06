@@ -167,9 +167,7 @@ class windowManager {
           let tabByWindowCount = 0;
           tabs.forEach((tab) => {
             if (tab.windowId === window.id) tabByWindowCount += 1;
-            console.log(tab.windowId);
           });
-          console.log(window.id);
 
           // if at least two tabs exist in one window, remove contextMenu with id 'split-tabs' and create new contextMenu
           if (tabByWindowCount > 1) {
