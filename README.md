@@ -1,12 +1,16 @@
 ---
-author: Marcel, Kilian
-title: Tabs to windows
+author: Marcel Arndt, Kilian Drechsler
+title: Window Manager
 ---
 
 ## Description
 
-Split tabs into multiple windows.
+Window Manager:
+
+- Split tabs into multiple windows
+
+- Merge windows
 
 ## Credits
 
-* Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows)
+- Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows)
