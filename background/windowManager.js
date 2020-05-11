@@ -11,7 +11,6 @@ class windowManager {
     this.windows = [];
 
     // call startup functions
-    this.setCurrentWindows();
     this._init();
   }
 
@@ -36,11 +35,9 @@ class windowManager {
         this.config.setConfiguration(config);
       }
     });
-  }
 
-  async setCurrentWindows() {
-    this._getCurrentWindows().then(
-      (value) => (this.windows = value),
+    this.windows = await this._getCurrentWindows().then(
+      (value) => value,
       (error) => console.error(error)
     );
   }
@@ -69,10 +66,12 @@ class windowManager {
       return;
     }
 
-    await this.setCurrentWindows();
+    this.windows = await this._getCurrentWindows().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
     const windows = this.windows;
 
-    // FIXME: Repining after splitting tabs doesn't work -> pinned tabs are simply ignored...WHYY?
     if (this.isRepinTabs) {
       splitRepinTabs(windows);
     } else {
@@ -109,11 +108,9 @@ class windowManager {
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
       const repinTabs = await Promise.all(repin);
-      repinTabs.forEach(async (tab) => {
-        await browser.tabs.update(tab.id, { pinned: true }).then(
-          () => {},
-          (error) => console.error(error)
-        );
+      repinTabs.forEach((tab) => {
+        //FIXME: browser.tabs.update does not repin tab - WHYYYYY?!
+        browser.tabs.update(tab.id, { pinned: true });
         console.log(tab);
       });
     }
@@ -139,7 +136,6 @@ class windowManager {
     this.menu.calculateTemporaryMenu();
   }
 
-  // FIXME: biggest = null when merge windows is clicked, when selecting merge windows again it works just as intended
   async merge() {
     const windowMap = new Map();
     let biggestCount = 0;
@@ -147,7 +143,10 @@ class windowManager {
     let repin = [];
 
     // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
-    await this.setCurrentWindows();
+    this.windows = await this._getCurrentWindows().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
     const promises = this.windows.map(async function (windowObj) {
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
