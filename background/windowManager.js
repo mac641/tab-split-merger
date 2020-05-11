@@ -1,7 +1,6 @@
 import { configManager } from "./configManager.js";
 import { menuManager } from "./menuManager.js";
 
-// TODO: adjust privacy measures
 class windowManager {
   constructor() {
     // Class attributes
@@ -11,10 +10,10 @@ class windowManager {
     this.windows = [];
 
     // call startup functions
-    this._init();
+    this.init();
   }
 
-  async _init() {
+  async init() {
     browser.menus.onClicked.addListener(async (info) => {
       if (info.menuItemId === this.menu.splitId) {
         this.split();
@@ -36,13 +35,13 @@ class windowManager {
       }
     });
 
-    this.windows = await this._getCurrentWindows().then(
+    this.windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );
   }
 
-  async _getCurrentWindows() {
+  async getCurrentWindows() {
     // get current window as window.Window object and all windows as window.Window array
     const currentWindow = await browser.windows.getCurrent();
     const windows = await browser.windows.getAll({});
@@ -66,7 +65,7 @@ class windowManager {
       return;
     }
 
-    this.windows = await this._getCurrentWindows().then(
+    this.windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );
@@ -102,17 +101,24 @@ class windowManager {
           browser.windows.create({
             tabId: tab.id
           });
+          console.log(tab.id);
         });
       });
 
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
       const repinTabs = await Promise.all(repin);
-      repinTabs.forEach((tab) => {
+      console.log(repinTabs);
+      repinTabs.map(async function (tab) {
         //FIXME: browser.tabs.update does not repin tab - WHYYYYY?!
-        browser.tabs.update(tab.id, { pinned: true });
+        tab = await browser.tabs.update(tab.id, { pinned: true }).then(
+          (value) => value,
+          (error) => console.error(error)
+        );
         console.log(tab);
+        return tab;
       });
+      await Promise.all(repinTabs);
     }
 
     async function splitIgnorePinnedTabs(windows) {
@@ -143,7 +149,7 @@ class windowManager {
     let repin = [];
 
     // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
-    this.windows = await this._getCurrentWindows().then(
+    this.windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );

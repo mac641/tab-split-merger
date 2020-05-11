@@ -1,4 +1,3 @@
-// TODO: adjust privacy measures
 export class menuManager {
   constructor() {
     // Class attributes
@@ -9,7 +8,7 @@ export class menuManager {
     this.repinId = "configRepinTabs";
 
     // call startup functions
-    this._init();
+    this.init();
     this.calculateTemporaryMenu();
 
     // add event listeners
@@ -27,16 +26,7 @@ export class menuManager {
     });
   }
 
-  async calculateTemporaryMenu() {
-    await this._getCurrentWindows().then(
-      (value) => (this.windows = value),
-      (error) => console.error(error)
-    );
-    this._calculateSplitTabsContextMenu();
-    this._calculateMergeContextMenu();
-  }
-
-  async _init() {
+  async init() {
     // Add constant menu items
     browser.menus.remove(this.managerId);
     browser.menus.create({
@@ -69,7 +59,7 @@ export class menuManager {
     });
   }
 
-  async _getCurrentWindows() {
+  async getCurrentWindows() {
     // get current window as window.Window object and all windows as window.Window array
     const currentWindow = await browser.windows.getCurrent();
     const windows = await browser.windows.getAll({});
@@ -80,7 +70,16 @@ export class menuManager {
     });
   }
 
-  async _calculateSplitTabsContextMenu() {
+  async calculateTemporaryMenu() {
+    await this.getCurrentWindows().then(
+      (value) => (this.windows = value),
+      (error) => console.error(error)
+    );
+    this.calculateSplitTabsMenu();
+    this.calculateMergeMenu();
+  }
+
+  async calculateSplitTabsMenu() {
     browser.menus.remove(this.splitId);
 
     // check how many tabs exist and create split menu if there are at least 2
@@ -109,7 +108,7 @@ export class menuManager {
     );
   }
 
-  async _calculateMergeContextMenu() {
+  async calculateMergeMenu() {
     browser.menus.remove(this.mergeId);
     if (this.windows.length > 1) {
       browser.menus.create({

@@ -1,4 +1,3 @@
-// TODO: adjust privacy measures
 export class configManager {
   constructor() {
     // Class attributes
@@ -7,7 +6,32 @@ export class configManager {
     this.windows = [];
 
     // call startup functions
-    this._init();
+    this.init();
+  }
+
+  async init() {
+    this.setCurrentWindows();
+
+    // set default configuration
+    const currentConfig = await this.getConfiguration();
+    const defaultConfig = {
+      threshold: this.defaultThreshold,
+      repinTabs: this.defaultRepinTabs
+    };
+    if (isConfigValid(currentConfig, defaultConfig)) {
+      this.setConfiguration(defaultConfig);
+    }
+
+    // check of Object.keys().length to avoid overwriting
+    function isConfigValid(currentConfig, defaultConfig) {
+      return (
+        Object.keys(currentConfig).length === 0 ||
+        currentConfig === null ||
+        currentConfig === undefined ||
+        (currentConfig.threshold === defaultConfig.threshold &&
+          currentConfig.repinTabs === defaultConfig.repinTabs)
+      );
+    }
   }
 
   async getConfiguration() {
@@ -26,6 +50,24 @@ export class configManager {
         console.error(error);
       }
     );
+  }
+
+  async setCurrentWindows() {
+    this.getCurrentWindows().then(
+      (value) => (this.windows = value),
+      (error) => console.error(error)
+    );
+  }
+
+  async getCurrentWindows() {
+    // get current window as window.Window object and all windows as window.Window array
+    const currentWindow = await browser.windows.getCurrent();
+    const windows = await browser.windows.getAll({});
+
+    // Remove incognito windows and return
+    return windows.filter((windowObj) => {
+      return windowObj.incognito === currentWindow.incognito;
+    });
   }
 
   async askForCurrentConfig() {
@@ -91,48 +133,5 @@ export class configManager {
     });
 
     return confirm;
-  }
-
-  async _init() {
-    this.setCurrentWindows();
-
-    // set default configuration
-    const currentConfig = await this.getConfiguration();
-    const defaultConfig = {
-      threshold: this.defaultThreshold,
-      repinTabs: this.defaultRepinTabs
-    };
-    if (isConfigValid(currentConfig, defaultConfig)) {
-      this.setConfiguration(defaultConfig);
-    }
-
-    // check of Object.keys().length to avoid overwriting
-    function isConfigValid(currentConfig, defaultConfig) {
-      return (
-        Object.keys(currentConfig).length === 0 ||
-        currentConfig === null ||
-        currentConfig === undefined ||
-        (currentConfig.threshold === defaultConfig.threshold &&
-          currentConfig.repinTabs === defaultConfig.repinTabs)
-      );
-    }
-  }
-
-  async setCurrentWindows() {
-    this._getCurrentWindows().then(
-      (value) => (this.windows = value),
-      (error) => console.error(error)
-    );
-  }
-
-  async _getCurrentWindows() {
-    // get current window as window.Window object and all windows as window.Window array
-    const currentWindow = await browser.windows.getCurrent();
-    const windows = await browser.windows.getAll({});
-
-    // Remove incognito windows and return
-    return windows.filter((windowObj) => {
-      return windowObj.incognito === currentWindow.incognito;
-    });
   }
 }
