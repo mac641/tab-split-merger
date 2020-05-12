@@ -6,7 +6,6 @@ class windowManager {
     // Class attributes
     this.config = new configManager();
     this.menu = new menuManager();
-    this.isRepinTabs = true;
     this.windows = [];
 
     // call startup functions
@@ -71,7 +70,11 @@ class windowManager {
     );
     const windows = this.windows;
 
-    if (this.isRepinTabs) {
+    const config = await this.config.getConfiguration().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
+    if (config.repinTabs) {
       splitRepinTabs(windows);
     } else {
       splitIgnorePinnedTabs(windows);
@@ -101,24 +104,16 @@ class windowManager {
           browser.windows.create({
             tabId: tab.id
           });
-          console.log(tab.id);
         });
       });
 
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
       const repinTabs = await Promise.all(repin);
-      console.log(repinTabs);
-      repinTabs.map(async function (tab) {
-        //FIXME: browser.tabs.update does not repin tab - WHYYYYY?!
-        tab = await browser.tabs.update(tab.id, { pinned: true }).then(
-          (value) => value,
-          (error) => console.error(error)
-        );
-        console.log(tab);
-        return tab;
+      repinTabs.forEach(async function (tab) {
+        // FIXME: browser.tabs.update does not repin tab - WHYYYYY?!
+        browser.tabs.update(tab.id, { pinned: true });
       });
-      await Promise.all(repinTabs);
     }
 
     async function splitIgnorePinnedTabs(windows) {
@@ -148,45 +143,93 @@ class windowManager {
     let biggest = null;
     let repin = [];
 
-    // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
     this.windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );
-    const promises = this.windows.map(async function (windowObj) {
-      const tabs = await browser.tabs.query({
-        windowId: windowObj.id
-      });
-      windowMap.set(
-        windowObj,
-        tabs.map((tab) => {
-          if (tab.pinned) {
-            repin.push(browser.tabs.update(tab.id, { pinned: false }));
-          }
-          return tab.id;
-        })
-      );
-      if (tabs.length > biggestCount) {
-        biggest = windowObj;
-        biggestCount = tabs.length;
-      }
-    });
+    const windows = this.windows;
 
-    // Solve all Promises and repin previously unpinned tabs
-    await Promise.all(promises);
-    const repinTabs = await Promise.all(repin);
-    this.windows.forEach((windowObj) => {
-      if (windowObj === biggest) {
-        return;
-      }
-      browser.tabs.move(windowMap.get(windowObj), {
-        index: -1,
-        windowId: biggest.id
+    const config = await this.config.getConfiguration().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
+    if (config.repinTabs) {
+      mergeRepinTabs(windows);
+    } else {
+      mergeIgnorePinnedTabs(windows);
+    }
+
+    async function mergeRepinTabs(windows) {
+      // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
+      const promises = windows.map(async function (windowObj) {
+        const tabs = await browser.tabs.query({
+          windowId: windowObj.id
+        });
+        windowMap.set(
+          windowObj,
+          tabs.map((tab) => {
+            if (tab.pinned) {
+              repin.push(browser.tabs.update(tab.id, { pinned: false }));
+            }
+            return tab.id;
+          })
+        );
+        if (tabs.length > biggestCount) {
+          biggest = windowObj;
+          biggestCount = tabs.length;
+        }
       });
-    });
-    repinTabs.forEach((tab) => {
-      browser.tabs.update(tab.id, { pinned: true });
-    });
+
+      // Solve all Promises and repin previously unpinned tabs
+      await Promise.all(promises);
+      const repinTabs = await Promise.all(repin);
+      windows.forEach((windowObj) => {
+        if (windowObj === biggest) {
+          return;
+        }
+        browser.tabs.move(windowMap.get(windowObj), {
+          index: -1,
+          windowId: biggest.id
+        });
+      });
+      repinTabs.forEach((tab) => {
+        browser.tabs.update(tab.id, {
+          pinned: true
+        });
+      });
+    }
+
+    async function mergeIgnorePinnedTabs(windows) {
+      // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
+      const promises = windows.map(async function (windowObj) {
+        const tabs = await browser.tabs.query({
+          windowId: windowObj.id
+        });
+        windowMap.set(
+          windowObj,
+          tabs.map((tab) => {
+            browser.tabs.update(tab.id, { pinned: false });
+            return tab.id;
+          })
+        );
+        if (tabs.length > biggestCount) {
+          biggest = windowObj;
+          biggestCount = tabs.length;
+        }
+      });
+
+      // Solve all Promises and repin previously unpinned tabs
+      await Promise.all(promises);
+      windows.forEach((windowObj) => {
+        if (windowObj === biggest) {
+          return;
+        }
+        browser.tabs.move(windowMap.get(windowObj), {
+          index: -1,
+          windowId: biggest.id
+        });
+      });
+    }
     this.menu.calculateTemporaryMenu();
   }
 }
