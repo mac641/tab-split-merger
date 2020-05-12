@@ -17,7 +17,7 @@ class windowManager {
       if (info.menuItemId === this.menu.splitId) {
         this.split();
       } else if (info.menuItemId === this.menu.thresholdId) {
-        this.config.askForThresholdConfig();
+        this.config.askForCurrentConfig();
       } else if (info.menuItemId === this.menu.mergeId) {
         this.merge();
       } else if (info.menuItemId === this.menu.repinId) {
@@ -110,7 +110,7 @@ class windowManager {
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
       const repinTabs = await Promise.all(repin);
-      repinTabs.forEach(async function (tab) {
+      repinTabs.forEach(async (tab) => {
         // FIXME: browser.tabs.update does not repin tab - WHYYYYY?!
         browser.tabs.update(tab.id, { pinned: true });
       });
@@ -161,7 +161,7 @@ class windowManager {
 
     async function mergeRepinTabs(windows) {
       // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
-      const promises = windows.map(async function (windowObj) {
+      const promises = windows.map(async (windowObj) => {
         const tabs = await browser.tabs.query({
           windowId: windowObj.id
         });
@@ -183,7 +183,7 @@ class windowManager {
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
       const repinTabs = await Promise.all(repin);
-      windows.forEach((windowObj) => {
+      windows.forEach(async (windowObj) => {
         if (windowObj === biggest) {
           return;
         }
@@ -201,7 +201,7 @@ class windowManager {
 
     async function mergeIgnorePinnedTabs(windows) {
       // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
-      const promises = windows.map(async function (windowObj) {
+      const promises = windows.map(async (windowObj) => {
         const tabs = await browser.tabs.query({
           windowId: windowObj.id
         });
@@ -220,7 +220,7 @@ class windowManager {
 
       // Solve all Promises and repin previously unpinned tabs
       await Promise.all(promises);
-      windows.forEach((windowObj) => {
+      windows.forEach(async (windowObj) => {
         if (windowObj === biggest) {
           return;
         }
