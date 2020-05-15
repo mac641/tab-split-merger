@@ -57,7 +57,7 @@ class windowManager {
       return;
     }
 
-    let windows = await this.getCurrentWindows().then(
+    const windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );
@@ -67,10 +67,11 @@ class windowManager {
       (error) => console.error(error)
     );
 
-    // For each window get all tabs, map them to current window object and push pinned tabs into repin array after unpinning
+    // For each window get all tabs, push pinned tabs into repin array after unpinning
+    // and push newly created windows into createdWindowsPromises array
     let repin = [];
     let lastActiveTab = null;
-    let createdWindows = [];
+    let createdWindowsPromises = [];
     const promises = windows.map(async (windowObj) => {
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
@@ -92,7 +93,7 @@ class windowManager {
         return;
       }
       tabs.map(async (tab) => {
-        createdWindows.push(
+        createdWindowsPromises.push(
           browser.windows.create({
             tabId: tab.id
           })
@@ -103,12 +104,12 @@ class windowManager {
     // Solve all Promises and repin previously unpinned tabs
     await Promise.all(promises);
     const repinTabs = await Promise.all(repin);
-    await Promise.all(createdWindows);
+    const createdWindows = await Promise.all(createdWindowsPromises);
 
     if (config.repinTabs) {
       this.afterRepin(repinTabs);
     }
-    this.refocus(lastActiveTab);
+    this.refocus(lastActiveTab, createdWindows);
 
     this.menu.calculateTemporaryMenu();
   }
@@ -169,28 +170,28 @@ class windowManager {
       this.afterRepin(repinTabs);
     }
 
-    this.refocus(lastActiveTab);
+    this.refocus(lastActiveTab, biggest);
 
     this.menu.calculateTemporaryMenu();
   }
 
+  // Repin previously pinned tabs
   async afterRepin(repinTabs) {
     repinTabs.forEach(async (tab) => {
       browser.tabs.update(tab.id, { pinned: true });
     });
   }
 
-  // FIXME: does not work - why?
-  async refocus(lastActiveTab) {
-    const windows = await this.getCurrentWindows().then(
-      (value) => value,
-      (error) => console.error(error)
-    );
+  // Refocus previously selected tab
+  async refocus(lastActiveTab, windows) {
+    if (!Array.isArray(windows)) {
+      browser.tabs.update(lastActiveTab.id, { active: true });
+      return;
+    }
 
     windows.forEach((window) => {
-      console.log(window.tabs);
       const tabs = window.tabs;
-      tabs.forEach((tab) => {
+      tabs.forEach(async (tab) => {
         if (tab.id === lastActiveTab.id) {
           browser.windows.update(window.id, { focused: true });
           browser.tabs.update(lastActiveTab.id, { active: true });
