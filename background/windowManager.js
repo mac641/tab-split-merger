@@ -57,7 +57,7 @@ class windowManager {
       return;
     }
 
-    const windows = await this.getCurrentWindows().then(
+    let windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
     );
@@ -69,6 +69,8 @@ class windowManager {
 
     // For each window get all tabs, map them to current window object and push pinned tabs into repin array after unpinning
     let repin = [];
+    let lastActiveTab = null;
+    let createdWindows = [];
     const promises = windows.map(async (windowObj) => {
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
@@ -81,34 +83,37 @@ class windowManager {
             })
           );
         }
+        if (windowObj.focused && tab.active) {
+          lastActiveTab = tab;
+        }
         return tab.id;
       });
       if (tabs.length < 2) {
         return;
       }
-      tabs.map((tab) => {
-        browser.windows.create({
-          tabId: tab.id
-        });
+      tabs.map(async (tab) => {
+        createdWindows.push(
+          browser.windows.create({
+            tabId: tab.id
+          })
+        );
       });
     });
 
     // Solve all Promises and repin previously unpinned tabs
     await Promise.all(promises);
     const repinTabs = await Promise.all(repin);
+    await Promise.all(createdWindows);
 
     if (config.repinTabs) {
       this.afterRepin(repinTabs);
     }
+    this.refocus(lastActiveTab);
+
     this.menu.calculateTemporaryMenu();
   }
 
   async merge() {
-    const windowMap = new Map();
-    let biggestCount = 0;
-    let biggest = null;
-    let repin = [];
-
     const windows = await this.getCurrentWindows().then(
       (value) => value,
       (error) => console.error(error)
@@ -120,6 +125,11 @@ class windowManager {
     );
 
     // For each window map tabs to window objects, unpin pinned tabs and push them into repin array
+    const windowMap = new Map();
+    let biggestCount = 0;
+    let biggest = null;
+    let repin = [];
+    let lastActiveTab = null;
     const promises = windows.map(async (windowObj) => {
       const tabs = await browser.tabs.query({
         windowId: windowObj.id
@@ -129,6 +139,9 @@ class windowManager {
         tabs.map((tab) => {
           if (tab.pinned) {
             repin.push(browser.tabs.update(tab.id, { pinned: false }));
+          }
+          if (windowObj.focused && tab.active) {
+            lastActiveTab = tab;
           }
           return tab.id;
         })
@@ -156,15 +169,34 @@ class windowManager {
       this.afterRepin(repinTabs);
     }
 
+    this.refocus(lastActiveTab);
+
     this.menu.calculateTemporaryMenu();
   }
 
   async afterRepin(repinTabs) {
-    repinTabs.forEach((tab) => {
-      // FIXME: browser.tabs.update does not repin tab when splitting - WHYYYYY?!
+    repinTabs.forEach(async (tab) => {
       browser.tabs.update(tab.id, { pinned: true });
     });
-    return Promise.resolve("Repinned!");
+  }
+
+  // FIXME: does not work - why?
+  async refocus(lastActiveTab) {
+    const windows = await this.getCurrentWindows().then(
+      (value) => value,
+      (error) => console.error(error)
+    );
+
+    windows.forEach((window) => {
+      console.log(window.tabs);
+      const tabs = window.tabs;
+      tabs.forEach((tab) => {
+        if (tab.id === lastActiveTab.id) {
+          browser.windows.update(window.id, { focused: true });
+          browser.tabs.update(lastActiveTab.id, { active: true });
+        }
+      });
+    });
   }
 }
 
