@@ -1,11 +1,10 @@
 {
   "manifest_version": 2,
   "name": "Firefox Window Manager",
-  "version": "0.2",
+  "version": "0.2.1",
   "description": "Split tabs into separate windows and merge them back together into one.",
   "homepage_url": "https://github.com/mac641/tabs-to-windows",
   "permissions": ["tabs", "menus", "activeTab", "storage"],
-  "optional_permissions": ["<all_urls>"],
   "background": {
     "page": "background/background.html"
   }
