@@ -1,15 +1,46 @@
----
-author: Marcel Arndt, Kilian Drechsler
-title: Window Manager
----
+# Firefox Window Manager
 
-## Description
+## Features
 
-Window Manager:
+### Main Features
 
 - Split tabs into multiple windows
 
-- Merge windows
+- Merge all windows
+
+### Configuration Features
+
+- Choose whether or not pinned tabs will be repinned
+
+- Configure when you will be prompted for confirmation when splitting tabs into windows
+
+## Usage
+
+This extension adds menu options to all open tabs except those in *Private Windows*. You can find them by performing a *right click* on the currently *active tab* (It only works on active tabs since the extension has no host permission).  
+At the bottom of this menu you should see a option called **Window Manager**. Just move your mouse over it and wait for the sub menu to open.
+
+### Set confirmation threshold
+
+This option is always visible.  
+By clicking it, you will be prompted for an Integer number, which specifies the amount of windows to be ignored before asking for confirmation when splitting tabs into windows.  
+**Default value: 2**
+
+### Repin tabs
+
+This option is always visible.  
+It is a checkbox, which tells the extension whether or not it will be repinning tabs when splitting tabs to windows / merging windows.  
+**Default value: true**
+
+### Split tabs
+
+This option is only visible when there are multiple tabs in one window.
+By clicking it, you will be prompted for confirmation based on the value set as *confirmation threshold*.  
+If you are prompted, you can click **Cancel** to stop the operation or **Ok** to run the operation, which will end up all your tabs in separate windows.
+
+### Merge windows
+
+This option is only visible when there are multiple firefox window instances open (*Private windows are ignored*).  
+By clicking it, all tabs are moved to the window, which has the most currently opened tabs.
 
 ## Credits
 
