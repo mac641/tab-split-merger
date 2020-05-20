@@ -65,10 +65,8 @@ class windowManager {
         (value) => value,
         (error) => console.error(error)
       );
-    } else if (!all) {
-      windows.push(await browser.windows.getCurrent());
     } else {
-      console.error(`Something went wrong! 'all' is assigned ${all}`);
+      windows.push(await browser.windows.getCurrent());
     }
 
     const config = await this.config.getConfiguration().then(

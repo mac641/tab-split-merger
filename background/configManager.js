@@ -114,14 +114,12 @@ export class configManager {
     if (all) {
       windowCount = this.windows.length;
       numberOfTabs = await browser.tabs.query({}).then((value) => value.length);
-    } else if (!all) {
+    } else {
       const currentWindow = await browser.windows.getCurrent();
       windowCount = 1;
       numberOfTabs = await browser.tabs
         .query({ windowId: currentWindow.id })
         .then((value) => value.length);
-    } else {
-      console.error(`Something went wrong! 'all' is assigned ${all}`);
     }
     const activeTab = await browser.tabs.query({
       active: true,

@@ -1,7 +1,7 @@
 export class menuManager {
   constructor() {
     // Class attributes
-    this.managerId = "windowManager";
+    this.managerId = "tabSplitMerger";
     this.thresholdId = "configConfirmationThreshold";
     this.splitAllId = "splitAllTabs";
     this.splitCurrentId = "splitCurrentId";
@@ -32,7 +32,7 @@ export class menuManager {
     browser.menus.remove(this.managerId);
     browser.menus.create({
       id: this.managerId,
-      title: "Window Manager",
+      title: "Tab Split Merger",
       contexts: ["all", "tab"]
     });
     browser.menus.remove(this.thresholdId);

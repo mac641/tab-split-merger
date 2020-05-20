@@ -1,4 +1,4 @@
-# Window Manager for Firefox
+# Tab Split Merger for Firefox
 
 ## Features
 
@@ -25,7 +25,7 @@ Then navigate to the downloaded directory and select `manifest.json`.
 ## Usage
 
 This extension adds menu options to all open tabs except those in *Private Windows*. You can find them by performing a *right click* on the currently *active tab* (It only works on active tabs since the extension has no host permission).  
-At the bottom of this menu you should see a option called **Window Manager**. Just move your mouse over it and wait for the sub menu to open.
+At the bottom of this menu you should see a option called **Tab Split Merger**. Just move your mouse over it and wait for the sub menu to open.
 
 ### Set confirmation threshold
 
