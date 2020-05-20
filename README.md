@@ -50,6 +50,12 @@ If you are prompted, you can click **Cancel** to stop the operation or **Ok** to
 This option is only visible when there are multiple firefox window instances open (*Private windows are ignored*).  
 By clicking it, all tabs are moved to the window, which has the most currently opened tabs.
 
+## Known Issues
+
+### Tree Style Tab
+
+If used together with the Addon "Tree Style Tab", the subordinated tabs will be merge again, into one window, after spliting into many windows.
+
 ## Credits
 
 - Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows)
