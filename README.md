@@ -39,9 +39,15 @@ This option is always visible.
 It is a checkbox, which tells the extension whether or not it will be repinning tabs when splitting tabs to windows / merging windows.  
 **Default value: true**
 
-### Split tabs
+### Split tabs in current window
 
-This option is only visible when there are multiple tabs in one window.
+This option is only visible when there are multiple tabs in the currently focused window.
+By clicking it, you will be prompted for confirmation based on the value set as *confirmation threshold*.  
+If you are prompted, you can click **Cancel** to stop the operation or **Ok** to run the operation, which will end up all your tabs in separate windows.
+
+### Split tabs in all windows
+
+This option is only visible when there is more than one window with multiple tabs.
 By clicking it, you will be prompted for confirmation based on the value set as *confirmation threshold*.  
 If you are prompted, you can click **Cancel** to stop the operation or **Ok** to run the operation, which will end up all your tabs in separate windows.
 
