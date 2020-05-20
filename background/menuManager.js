@@ -3,7 +3,8 @@ export class menuManager {
     // Class attributes
     this.managerId = "windowManager";
     this.thresholdId = "configConfirmationThreshold";
-    this.splitId = "splitTabs";
+    this.splitAllId = "splitAllTabs";
+    this.splitCurrentId = "splitCurrentId";
     this.mergeId = "mergeWindows";
     this.repinId = "configRepinTabs";
 
@@ -80,7 +81,8 @@ export class menuManager {
   }
 
   async calculateSplitTabsMenu() {
-    browser.menus.remove(this.splitId);
+    browser.menus.remove(this.splitAllId);
+    browser.menus.remove(this.splitCurrentId);
 
     // check how many tabs exist and create split menu if there are at least 2
     browser.tabs.query({}).then(
@@ -92,13 +94,24 @@ export class menuManager {
           });
 
           if (tabByWindowCount > 1) {
-            browser.menus.remove(this.splitId);
-            browser.menus.create({
-              id: this.splitId,
-              title: "Split tabs",
-              contexts: ["all", "tab"],
-              parentId: this.managerId
-            });
+            if (window.focused === true) {
+              browser.menus.remove(this.splitCurrentId);
+              browser.menus.create({
+                id: this.splitCurrentId,
+                title: "Split tabs in current window",
+                contexts: ["all", "tab"],
+                parentId: this.managerId
+              });
+            }
+            if (this.windows.length > 1) {
+              browser.menus.remove(this.splitAllId);
+              browser.menus.create({
+                id: this.splitAllId,
+                title: "Split tabs in all windows",
+                contexts: ["all", "tab"],
+                parentId: this.managerId
+              });
+            }
           }
         });
       },

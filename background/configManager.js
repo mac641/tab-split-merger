@@ -105,14 +105,24 @@ export class configManager {
     }
   }
 
-  async askForSplitPermission() {
+  async askForSplitPermission(all) {
     // get confirmationThreshold, windowCount, numberOfTabs and activeTab
-    const confirmationThreshold = (await this.getConfiguration()).threshold;
     await this.setCurrentWindows();
-    const windowCount = this.windows.length;
-    const numberOfTabs = await browser.tabs
-      .query({})
-      .then((value) => value.length);
+    const confirmationThreshold = (await this.getConfiguration()).threshold;
+    let windowCount = 0;
+    let numberOfTabs = 0;
+    if (all) {
+      windowCount = this.windows.length;
+      numberOfTabs = await browser.tabs.query({}).then((value) => value.length);
+    } else if (!all) {
+      const currentWindow = await browser.windows.getCurrent();
+      windowCount = 1;
+      numberOfTabs = await browser.tabs
+        .query({ windowId: currentWindow.id })
+        .then((value) => value.length);
+    } else {
+      console.error(`Something went wrong! 'all' is assigned ${all}`);
+    }
     const activeTab = await browser.tabs.query({
       active: true,
       currentWindow: true

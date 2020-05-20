@@ -13,8 +13,10 @@ class windowManager {
 
   async init() {
     browser.menus.onClicked.addListener(async (info) => {
-      if (info.menuItemId === this.menu.splitId) {
-        this.split();
+      if (info.menuItemId === this.menu.splitAllId) {
+        this.split(true);
+      } else if (info.menuItemId === this.menu.splitCurrentId) {
+        this.split(false);
       } else if (info.menuItemId === this.menu.thresholdId) {
         this.config.askForCurrentConfig();
       } else if (info.menuItemId === this.menu.mergeId) {
@@ -45,10 +47,10 @@ class windowManager {
     });
   }
 
-  async split() {
+  async split(all) {
     // ask for confirmation before splitting tabs into windows
     let isSplit = false;
-    await this.config.askForSplitPermission().then(
+    await this.config.askForSplitPermission(all).then(
       (value) => (isSplit = value[0]),
       (error) => console.error(error)
     );
@@ -57,10 +59,17 @@ class windowManager {
       return;
     }
 
-    const windows = await this.getCurrentWindows().then(
-      (value) => value,
-      (error) => console.error(error)
-    );
+    let windows = [];
+    if (all) {
+      windows = await this.getCurrentWindows().then(
+        (value) => value,
+        (error) => console.error(error)
+      );
+    } else if (!all) {
+      windows.push(await browser.windows.getCurrent());
+    } else {
+      console.error(`Something went wrong! 'all' is assigned ${all}`);
+    }
 
     const config = await this.config.getConfiguration().then(
       (value) => value,
