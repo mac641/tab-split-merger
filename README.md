@@ -1,4 +1,4 @@
-# Firefox Window Manager
+# Window Manager for Firefox
 
 ## Features
 
