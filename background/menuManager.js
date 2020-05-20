@@ -4,7 +4,7 @@ export class menuManager {
     this.managerId = "tabSplitMerger";
     this.thresholdId = "configConfirmationThreshold";
     this.splitAllId = "splitAllTabs";
-    this.splitCurrentId = "splitCurrentId";
+    this.splitCurrentId = "splitCurrentTabs";
     this.mergeId = "mergeWindows";
     this.repinId = "configRepinTabs";
 

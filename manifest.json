@@ -1,11 +1,34 @@
 {
   "manifest_version": 2,
   "name": "Tab Split Merger",
-  "version": "1.0.1",
+  "version": "1.1",
   "description": "Split tabs into separate windows and merge them back together into one.",
   "homepage_url": "https://github.com/mac641/tab-split-merger",
   "permissions": ["menus", "activeTab", "storage"],
   "background": {
     "page": "background/background.html"
+  },
+  "commands": {
+  "mergeWindows": {
+    "suggested_key": {
+      "default": "Alt+Shift+M",
+      "mac": "MacCtrl+Shift+M"
+    },
+    "description": "Merge windows"
+  },
+  "splitAllTabs": {
+    "suggested_key": {
+      "default": "Alt+Shift+S",
+      "mac": "MacCtrl+Shift+S"
+    },
+    "description": "Split tabs in all windows."
+  },
+  "splitCurrentTabs": {
+    "suggested_key": {
+      "default": "Alt+Shift+D",
+      "mac": "MacCtrl+Shift+D"
+    },
+    "description": "Split tabs in current window."
   }
+}
 }
