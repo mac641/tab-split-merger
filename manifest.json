@@ -9,26 +9,26 @@
     "page": "background/background.html"
   },
   "commands": {
-  "mergeWindows": {
-    "suggested_key": {
-      "default": "Alt+Shift+M",
-      "mac": "MacCtrl+Shift+M"
+    "mergeWindows": {
+      "suggested_key": {
+        "default": "Alt+Shift+M",
+        "mac": "MacCtrl+Shift+M"
+      },
+      "description": "Merge windows"
     },
-    "description": "Merge windows"
-  },
-  "splitAllTabs": {
-    "suggested_key": {
-      "default": "Alt+Shift+S",
-      "mac": "MacCtrl+Shift+S"
+    "splitAllTabs": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "MacCtrl+Shift+S"
+      },
+      "description": "Split tabs in all windows."
     },
-    "description": "Split tabs in all windows."
-  },
-  "splitCurrentTabs": {
-    "suggested_key": {
-      "default": "Alt+Shift+D",
-      "mac": "MacCtrl+Shift+D"
-    },
-    "description": "Split tabs in current window."
+    "splitCurrentTabs": {
+      "suggested_key": {
+        "default": "Alt+Shift+D",
+        "mac": "MacCtrl+Shift+D"
+      },
+      "description": "Split tabs in current window."
+    }
   }
-}
 }
