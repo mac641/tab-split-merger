@@ -3,7 +3,7 @@
   "name": "Window Manager",
   "version": "1.0",
   "description": "Split tabs into separate windows and merge them back together into one.",
-  "homepage_url": "https://github.com/mac641/firefox-window-manager",
+  "homepage_url": "https://github.com/mac641/window-manager",
   "permissions": ["menus", "activeTab", "storage"],
   "background": {
     "page": "background/background.html"
