@@ -1,13 +1,5 @@
 # Firefox Window Manager
 
-## Installation
-
-> In Firefox: Open the about:debugging page, click "This Firefox" (in newer versions of Firefox), click "Load Temporary Add-on".
-
-Then navigate to the downloaded directory and select `manifest.json`.
-
-[MDN: Your first extension](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension)
-
 ## Features
 
 ### Main Features
@@ -21,6 +13,14 @@ Then navigate to the downloaded directory and select `manifest.json`.
 - Choose whether or not pinned tabs will be repinned
 
 - Configure when you will be prompted for confirmation when splitting tabs into windows
+
+## Installation
+
+> In Firefox: Open the about:debugging page, click "This Firefox" (in newer versions of Firefox), click "Load Temporary Add-on".
+
+Then navigate to the downloaded directory and select `manifest.json`.
+
+[MDN: Your first extension](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension)
 
 ## Usage
 
