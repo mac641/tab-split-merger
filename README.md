@@ -54,7 +54,11 @@ By clicking it, all tabs are moved to the window, which has the most currently o
 
 ### Tree Style Tab
 
-If used together with the Addon "Tree Style Tab", the subordinated tabs will be merge again, into one window, after spliting into many windows.
+If used together with the addon "Tree Style Tab", the subordinated tabs will be merged again into one window, after splitting tabs into windows.
+
+### Never Remember History
+
+If Firefox is configured to *Never remember history*, the extension won't work, because every window instance is handled as *private browsing*.
 
 ## Credits
 
