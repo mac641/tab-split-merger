@@ -34,6 +34,16 @@ class windowManager {
         this.config.setConfiguration(config);
       }
     });
+
+    browser.commands.onCommand.addListener(async (command) => {
+      if (command === this.menu.splitAllId) {
+        this.split(true);
+      } else if (command === this.menu.splitCurrentId) {
+        this.split(false);
+      } else if (command === this.menu.mergeId) {
+        this.merge();
+      }
+    });
   }
 
   async getCurrentWindows() {
