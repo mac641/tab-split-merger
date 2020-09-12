@@ -80,7 +80,7 @@ export class configManager {
     });
     const thresholdPrompt = await browser.tabs
       .executeScript(activeTab.id, {
-        code: `window.prompt("Type a number which specifies the amount of windows to be ignored before asking for confirmation", ${currentConfig.threshold})`
+        code: `window.prompt("Type a number", ${currentConfig.threshold})`
       })
       .then(
         (value) => value,
@@ -126,8 +126,8 @@ export class configManager {
       currentWindow: true
     });
 
-    // if numberOfTabs < confirmationThreshold return true wrapped in Array wrapped in Promise -> same as confirm does below
-    if (numberOfTabs < confirmationThreshold) {
+    // if numberOfTabs - windowCount <= confirmationThreshold return true wrapped in Array wrapped in Promise -> same as confirm does below
+    if (numberOfTabs - windowCount <= confirmationThreshold) {
       return Promise.resolve([true]);
     }
 
