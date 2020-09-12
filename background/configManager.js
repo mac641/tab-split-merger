@@ -126,8 +126,8 @@ export class configManager {
       currentWindow: true
     });
 
-    // if numberOfTabs < confirmationThreshold return true wrapped in Array wrapped in Promise -> same as confirm does below
-    if (numberOfTabs <= confirmationThreshold) {
+    // if numberOfTabs - windowCount <= confirmationThreshold return true wrapped in Array wrapped in Promise -> same as confirm does below
+    if (numberOfTabs - windowCount <= confirmationThreshold) {
       return Promise.resolve([true]);
     }
 
