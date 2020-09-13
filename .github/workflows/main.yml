@@ -20,10 +20,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Pull and checkout source
-      - uses: actions/checkout@master
+        uses: actions/checkout@master
         
       - name: Build and sign WebExtension
-      - uses: Saphareas/sign-web-extension-action@v0.1
+        uses: Saphareas/sign-web-extension-action@v0.1
         with:
           web-ext-id: "{7f59e59d-6ece-4399-9c0d-b98d36c4db8c}"
           sign-listed: true
