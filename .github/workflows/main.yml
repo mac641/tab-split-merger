@@ -1,0 +1,32 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build Mozilla Firefox WebExtension
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        
+      - name: Build and sign WebExtension
+      - uses: Saphareas/sign-web-extension-action@v0.1
+        with:
+          web-ext-id: "{7f59e59d-6ece-4399-9c0d-b98d36c4db8c}"
+          sign-listed: true
+          amo-api-key: ${{ user:15987920:706 }}
+          amo-api-secret: ${{ 0ca7bd81835148b99f0309e193180cf59cc397caa836e0bf8b7de5f1f01d1d2f }}
+
