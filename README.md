@@ -4,6 +4,8 @@
 ![Mozilla Add-on](https://img.shields.io/amo/v/%7B7f59e59d-6ece-4399-9c0d-b98d36c4db8c%7D)
 ![Mozilla Add-on](https://img.shields.io/amo/stars/%7B7f59e59d-6ece-4399-9c0d-b98d36c4db8c%7D)
 
+**Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/en-US/firefox/addon/tab-split-merger/)**
+
 ## Features
 
 ### Main Features
