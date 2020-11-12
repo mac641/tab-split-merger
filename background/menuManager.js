@@ -5,8 +5,8 @@ export class menuManager {
     this.thresholdId = 'configConfirmationThreshold'
     this.splitAllId = 'splitAllTabs'
     this.splitCurrentId = 'splitCurrentTabs'
-    this.splitLeftId = 'splitLeft'
-    this.splitRightId = 'splitRight'
+    this.moveLeftId = 'moveLeft'
+    this.moveRightId = 'moveRight'
     this.mergeId = 'mergeWindows'
     this.repinId = 'configRepinTabs'
 
@@ -25,6 +25,9 @@ export class menuManager {
       this.calculateTemporaryMenu()
     })
     browser.tabs.onRemoved.addListener(() => {
+      this.calculateTemporaryMenu()
+    })
+    browser.tabs.onHighlighted.addListener(() => {
       this.calculateTemporaryMenu()
     })
   }
@@ -78,7 +81,9 @@ export class menuManager {
       (value) => (this.windows = value),
       (error) => console.error(error)
     )
+
     this.calculateSplitTabsMenu()
+    this.calculateMoveMenu()
     this.calculateMergeMenu()
   }
 
@@ -86,46 +91,89 @@ export class menuManager {
     browser.menus.remove(this.splitAllId)
     browser.menus.remove(this.splitCurrentId)
 
-    // check how many tabs exist and create split menu if there are at least 2
-    browser.tabs.query({}).then(
-      (tabs) => {
-        this.windows.map((window) => {
-          let tabByWindowCount = 0
-          tabs.forEach((tab) => {
-            if (tab.windowId === window.id) tabByWindowCount += 1
-          })
-
-          if (tabByWindowCount > 1) {
-            if (window.focused === true) {
-              browser.menus.remove(this.splitCurrentId)
-              browser.menus.create({
-                id: this.splitCurrentId,
-                title: 'Split tabs in current window',
-                contexts: ['all', 'tab'],
-                parentId: this.managerId
-              })
-            }
-            if (this.windows.length > 1) {
-              browser.menus.remove(this.splitAllId)
-              browser.menus.create({
-                id: this.splitAllId,
-                title: 'Split tabs in all windows',
-                contexts: ['all', 'tab'],
-                parentId: this.managerId
-              })
-            }
+    // get all tabs and sort by window
+    browser.tabs.query({}).then((tabs) => {
+      this.windows.map((window) => {
+        let tabByWindowCount = 0
+        tabs.forEach((tab) => {
+          if (tab.windowId === window.id) {
+            tabByWindowCount += 1
           }
         })
-      },
+
+        // check how many tabs exist and create split menu if there are at least 2
+        if (tabByWindowCount > 1) {
+          if (window.focused) {
+            browser.menus.remove(this.splitCurrentId)
+            browser.menus.create({
+              id: this.splitCurrentId,
+              title: 'Split tabs in current window',
+              contexts: ['all', 'tab'],
+              parentId: this.managerId
+            })
+          }
+          if (this.windows.length > 1) {
+            browser.menus.remove(this.splitAllId)
+            browser.menus.create({
+              id: this.splitAllId,
+              title: 'Split tabs in all windows',
+              contexts: ['all', 'tab'],
+              parentId: this.managerId
+            })
+          }
+        }
+      })
+    }),
       (error) => {
         return console.error(error)
       }
-    )
+  }
+
+  async calculateMoveMenu() {
+    browser.menus.remove(this.moveLeftId)
+    browser.menus.remove(this.moveRightId)
+
+    // get clickedTab and create context menu options based on its result
+    await browser.tabs
+      .query({
+        active: true,
+        currentWindow: true
+      })
+      .then((value) => {
+        const clickedTab = value[0]
+        browser.tabs.query({ currentWindow: true }).then((tabs) => {
+          // create move option for tabs to the left
+          if (clickedTab.index > 0) {
+            browser.menus.remove(this.moveLeftId)
+            browser.menus.create({
+              id: this.moveLeftId,
+              title: 'Move all tabs located on the left',
+              contexts: ['all', 'tab'],
+              parentId: this.managerId
+            })
+          }
+
+          // create move option for tabs to the right
+          if (clickedTab.index < tabs.length - 1) {
+            browser.menus.remove(this.moveRightId)
+            browser.menus.create({
+              id: this.moveRightId,
+              title: 'Move all tabs located on the right',
+              contexts: ['all', 'tab'],
+              parentId: this.managerId
+            })
+          }
+        })
+      }),
+      (error) => {
+        return console.error(error)
+      }
   }
 
   async calculateMergeMenu() {
     browser.menus.remove(this.mergeId)
     if (this.windows.length > 1) {
+      browser.menus.remove(this.mergeId)
       browser.menus.create({
         id: this.mergeId,
         title: 'Merge windows',

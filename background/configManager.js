@@ -134,7 +134,7 @@ export class configManager {
     // Inject js code into current active tab because background scripts are unable to access JavaScript API of browser window (including window.confirm, window.alert, etc.)
     const confirm = await browser.tabs.executeScript(activeTab.id, {
       code: `window.confirm(
-        \`You are going to open ${
+        \`You are about to open ${
           numberOfTabs - windowCount
         } additional windows.\nAre you sure?\`
       )`
