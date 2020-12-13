@@ -32,6 +32,10 @@ class windowManager {
           config.repinTabs = false
         }
         this.config.setConfiguration(config)
+      } else if (info.menuItemId === this.menu.moveLeftId) {
+        this.move('left')
+      } else if (info.menuItemId === this.menu.moveRightId) {
+        this.move('right')
       }
     })
 
@@ -42,6 +46,10 @@ class windowManager {
         this.split(false)
       } else if (command === this.menu.mergeId) {
         this.merge()
+      } else if (command === this.menu.moveLeftId) {
+        this.move('left')
+      } else if (command === this.menu.moveRightId) {
+        this.move('right')
       }
     })
   }
@@ -190,6 +198,80 @@ class windowManager {
     this.refocus(lastActiveTab, biggest)
 
     this.menu.calculateTemporaryMenu()
+  }
+
+  // Move tabs on left / right into new window
+  async move(direction) {
+    direction = direction.toLowerCase()
+    const currentWindow = await browser.windows.getCurrent()
+    const tabs = await browser.tabs.query({
+      windowId: currentWindow.id
+    })
+    const currentTab = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+      windowId: currentWindow.id
+    })
+    let move = []
+    let repin = []
+
+    const config = await this.config.getConfiguration().then(
+      (value) => value,
+      (error) => console.error(error)
+    )
+
+    if (direction === 'left') {
+      tabs.forEach((tab) => {
+        if (tab.index <= currentTab[0].index) {
+          if (tab.pinned === true) {
+            repin.push(browser.tabs.update(tab.id, { pinned: false }))
+          }
+          move.push(tab.id)
+        }
+      })
+      if (move.length > 0) {
+        // Create new window and solve all promises
+        let newWindow = await browser.windows.create().then(
+          (window) => window,
+          (error) => console.error(error)
+        )
+        const repinTabs = await Promise.all(repin)
+        await browser.tabs.move(move, {
+          windowId: newWindow.id,
+          index: -1
+        })
+        browser.tabs.remove(newWindow.tabs[0].id)
+        this.refocus(currentTab[0], newWindow)
+        if (config.repinTabs) {
+          this.afterRepin(repinTabs)
+        }
+      }
+    } else if (direction === 'right') {
+      tabs.forEach((tab) => {
+        if (tab.index > currentTab[0].index) {
+          if (tab.pinned === true) {
+            repin.push(browser.tabs.update(tab.id, { pinned: false }))
+          }
+          move.push(tab.id)
+        }
+      })
+      if (move.length > 0) {
+        // Create new window and solve all promises
+        let newWindow = await browser.windows.create().then(
+          (window) => window,
+          (error) => console.error(error)
+        )
+        const repinTabs = await Promise.all(repin)
+        await browser.tabs.move(move, {
+          windowId: newWindow.id,
+          index: -1
+        })
+        browser.tabs.remove(newWindow.tabs[0].id)
+        if (config.repinTabs) {
+          this.afterRepin(repinTabs)
+        }
+      }
+    }
   }
 
   // Repin previously pinned tabs

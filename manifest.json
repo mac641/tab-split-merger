@@ -35,14 +35,14 @@
         "default": "Alt+Shift+Y",
         "mac": "MacCtrl+Shift+Y"
       },
-      "description": "Move all tabs to the left of the active tab into one window."
+      "description": "Move all tabs on the left including the currently active tab into a new window."
     },
     "moveRight": {
       "suggested_key": {
         "default": "Alt+Shift+X",
         "mac": "MacCtrl+Shift+X"
       },
-      "description": "Move all tabs to the right of the active tab into one window."
+      "description": "Move all tabs on the right into a new window."
     }
   }
 }
