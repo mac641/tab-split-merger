@@ -1,5 +1,7 @@
 # Tab Split Merger for Firefox
 
+![logo](./icons/split.svg)
+
 ## Features
 
 ### Main Features
