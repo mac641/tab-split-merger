@@ -2,5 +2,20 @@
   "tabWidth": 2,
   "useTabs": false,
   "parser": "babel",
-  "trailingComma": "none"
+  "htmlWhitespaceSensitivity": "ignore",
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser":"html"
+      }
+    },
+        {
+      "files": "*.css",
+      "options": {
+        "parser":"css"
+      }
+    }
+  ]
 }
