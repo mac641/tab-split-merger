@@ -38,6 +38,20 @@
         "mac": "MacCtrl+Shift+D"
       },
       "description": "Split tabs in current window."
+    },
+    "moveLeft": {
+      "suggested_key": {
+        "default": "Alt+Shift+Y",
+        "mac": "MacCtrl+Shift+Y"
+      },
+      "description": "Move all tabs on the left including the currently active tab into a new window."
+    },
+    "moveRight": {
+      "suggested_key": {
+        "default": "Alt+Shift+X",
+        "mac": "MacCtrl+Shift+X"
+      },
+      "description": "Move all tabs on the right into a new window."
     }
   }
 }

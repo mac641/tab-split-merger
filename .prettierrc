@@ -17,5 +17,8 @@
         "parser":"css"
       }
     }
-  ]
+  ],
+  "singleQuote": true,
+  "semi": false,
+  "bracketSpacing": true
 }
