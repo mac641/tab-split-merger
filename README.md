@@ -34,6 +34,23 @@ At the bottom of this menu you should see a option called
 **Tab Split Merger**. Just move your mouse over it and wait for the sub menu 
 to open.
 
+### Help
+This option is always visible.  
+By clicking it, you will be redirected to this README file.
+
+### Set max window threshold
+This option is always visible.  
+By clicking it, you will be prompted for an Integer number, which specifies 
+the amount of windows to be ignored before asking for confirmation when 
+splitting tabs into windows.  
+**Default value: 2**
+
+### Repin tabs
+This option is always visible.  
+It is a checkbox, which tells the extension whether or not it will be 
+repinning tabs when splitting tabs to windows / merging windows.  
+**Default value: true**
+
 ### Split tabs in current window
 This option is only visible if there are multiple tabs in the currently 
 focused window. By clicking it, you will be prompted for confirmation based on 
@@ -90,19 +107,6 @@ Keyboard shortcuts
 
   * Default: `Alt+Shift+X`
   * macOS: `MacCtrl+Shift+X`
-
-### Set confirmation threshold
-This option is always visible.  
-By clicking it, you will be prompted for an Integer number, which specifies 
-the amount of windows to be ignored before asking for confirmation when 
-splitting tabs into windows.  
-**Default value: 2**
-
-### Repin tabs
-This option is always visible.  
-It is a checkbox, which tells the extension whether or not it will be 
-repinning tabs when splitting tabs to windows / merging windows.  
-**Default value: true**
 
 ## Known Issues
 Be aware, that if used together with different tab managing addons like 

@@ -58,7 +58,7 @@ export class menuManager {
     browser.menus.remove(this.thresholdId)
     browser.menus.create({
       id: this.thresholdId,
-      title: 'Set confirmation threshold',
+      title: 'Set max window threshold',
       contexts: ['all', 'tab'],
       parentId: this.managerId
     })
