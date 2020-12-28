@@ -2,6 +2,7 @@ export class menuManager {
   constructor() {
     // Class attributes
     this.managerId = 'tabSplitMerger'
+    this.helpId = 'help'
     this.thresholdId = 'configConfirmationThreshold'
     this.splitAllId = 'splitAllTabs'
     this.splitCurrentId = 'splitCurrentTabs'
@@ -40,6 +41,20 @@ export class menuManager {
       title: 'Tab Split Merger',
       contexts: ['all', 'tab']
     })
+    browser.menus.remove(this.helpId)
+    browser.menus.create({
+      id: this.helpId,
+      title: 'Help',
+      contexts: ['all', 'tab'],
+      parentId: this.managerId
+    })
+    browser.menus.remove('separator-1')
+    browser.menus.create({
+      id: 'separator-1',
+      type: 'separator',
+      contexts: ['all', 'tab'],
+      parentId: this.managerId
+    })
     browser.menus.remove(this.thresholdId)
     browser.menus.create({
       id: this.thresholdId,
@@ -56,9 +71,9 @@ export class menuManager {
       checked: true,
       parentId: this.managerId
     })
-    browser.menus.remove('separator-1')
+    browser.menus.remove('separator-2')
     browser.menus.create({
-      id: 'separator-1',
+      id: 'separator-2',
       type: 'separator',
       contexts: ['all', 'tab'],
       parentId: this.managerId
@@ -73,6 +88,28 @@ export class menuManager {
     // Remove incognito windows and return
     return windows.filter((windowObj) => {
       return windowObj.incognito === currentWindow.incognito
+    })
+  }
+
+  // Redirect to github docs
+  async openHelp() {
+    const currentWindow = await browser.windows.getCurrent()
+    const currentTab = await browser.tabs
+      .query({
+        active: true,
+        windowId: currentWindow.id
+      })
+      .then(
+        (value) => value[0],
+        (error) => console.error(error)
+      )
+    const url =
+      'https://github.com/mac641/tab-split-merger/blob/master/README.md'
+    browser.tabs.create({
+      active: true,
+      index: currentTab.index + 1,
+      url: url,
+      windowId: currentWindow.id
     })
   }
 

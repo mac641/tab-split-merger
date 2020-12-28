@@ -13,43 +13,63 @@ class windowManager {
 
   async init() {
     browser.menus.onClicked.addListener(async (info) => {
-      if (info.menuItemId === this.menu.splitAllId) {
-        this.split(true)
-      } else if (info.menuItemId === this.menu.splitCurrentId) {
-        this.split(false)
-      } else if (info.menuItemId === this.menu.thresholdId) {
-        this.config.askForCurrentConfig()
-      } else if (info.menuItemId === this.menu.mergeId) {
-        this.merge()
-      } else if (info.menuItemId === this.menu.repinId) {
-        let config = await this.config.getConfiguration().then(
-          (value) => value,
-          (error) => console.error(error)
-        )
-        if (info.checked) {
-          config.repinTabs = true
-        } else {
+      switch (info.menuItemId) {
+        case this.menu.helpId:
+          this.menu.openHelp()
+          break
+        case this.menu.thresholdId:
+          this.config.askForCurrentConfig()
+          break
+        case this.menu.repinId:
+          let config = await this.config.getConfiguration().then(
+            (value) => value,
+            (error) => console.error(error)
+          )
           config.repinTabs = false
-        }
-        this.config.setConfiguration(config)
-      } else if (info.menuItemId === this.menu.moveLeftId) {
-        this.move('left')
-      } else if (info.menuItemId === this.menu.moveRightId) {
-        this.move('right')
+          if (info.checked) {
+            config.repinTabs = true
+          }
+          this.config.setConfiguration(config)
+          break
+        case this.menu.splitAllId:
+          this.split(true)
+          break
+        case this.menu.splitCurrentId:
+          this.split(false)
+          break
+        case this.menu.mergeId:
+          this.merge()
+          break
+        case this.menu.moveLeftId:
+          this.move('left')
+          break
+        case this.menu.moveRightId:
+          this.move('right')
+          break
+        default:
+          break
       }
     })
 
     browser.commands.onCommand.addListener(async (command) => {
-      if (command === this.menu.splitAllId) {
-        this.split(true)
-      } else if (command === this.menu.splitCurrentId) {
-        this.split(false)
-      } else if (command === this.menu.mergeId) {
-        this.merge()
-      } else if (command === this.menu.moveLeftId) {
-        this.move('left')
-      } else if (command === this.menu.moveRightId) {
-        this.move('right')
+      switch (command) {
+        case this.menu.splitAllId:
+          this.split(true)
+          break
+        case this.menu.splitCurrentId:
+          this.split(false)
+          break
+        case this.menu.mergeId:
+          this.merge()
+          break
+        case this.menu.moveLeftId:
+          this.move('left')
+          break
+        case this.menu.moveRightId:
+          this.move('right')
+          break
+        default:
+          break
       }
     })
   }
