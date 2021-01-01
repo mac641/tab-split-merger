@@ -3,8 +3,7 @@
 ![Mozilla Add-on](https://img.shields.io/amo/v/%7B7f59e59d-6ece-4399-9c0d-b98d36c4db8c%7D)
 ![Mozilla Add-on](https://img.shields.io/amo/stars/%7B7f59e59d-6ece-4399-9c0d-b98d36c4db8c%7D)
 
-<div style="text-align:center;"><img style="width:200px;height:200px" 
-src="./icons/split.svg"/></div>
+<div style="text-align:center;"><svg style="fill: rgb(190, 190, 190)" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h48v48h-48z" fill="none"/><path d="M28 8l4.59 4.59-5.76 5.75 2.83 2.83 5.75-5.76 4.59 4.59v-12zm-8 0h-12v12l4.59-4.59 9.41 9.42v15.17h4v-16.83l-10.59-10.58z"/></svg></div>
 
 **Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/en-US/firefox/addon/tab-split-merger/)**
 
