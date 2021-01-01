@@ -1,14 +1,21 @@
+:root {
+  --grey-10: #f9f9fa;
+  --grey-60: #4a4a4f;
+}
+
 html,
 body {
-  color: white;
-  background-color: black;
-  width: 300px;
-  padding: 4px;
+  color: var(--grey-10);
+  background-color: var(--grey-60);
+  width: 320px;
+  max-width: 320px;
+  max-height: 90%;
+  overflow-x: hidden;
 }
 
 .popup-choice {
   width: 100%;
-  font-size: 1.5em;
+  font-size: 1em;
   text-align: left;
   cursor: pointer;
 }
