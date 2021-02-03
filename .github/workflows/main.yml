@@ -1,4 +1,4 @@
-name: Test, build and publish Mozilla Firefox WebExtension
+name: Test, build and publish tab-split-merger
 on:
   pull_request:
     # branches: [ master ]
@@ -56,4 +56,4 @@ jobs:
       # https://extensionworkshop.com/documentation/develop/web-ext-command-reference/
       # under '--channel'
       - name: Sign extension
-        run: web-ext sign --api-key ${{ secrets.WEBEXT_API_KEY }} --api-secret ${{ secrets.WEBEXT_API_SECRET }} --id ${{ secrets.WEBEXT_ID }}
+        run: web-ext sign --api-key ${{ secrets.WEBEXT_API_KEY }} --api-secret ${{ secrets.WEBEXT_API_SECRET }} --id ${{ secrets.WEBEXT_ID }} --channel=listed
