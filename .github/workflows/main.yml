@@ -31,8 +31,7 @@ jobs:
       - name: Install web-ext
         run: npm install -g web-ext
       - name: Build extension
-        run: |
-          web-ext build
+        run: web-ext build
       - name: Store build as artifact
         uses: actions/upload-artifact@v2
         with:
@@ -44,10 +43,8 @@ jobs:
     name: Publish the extension
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: tab-split-merger-build
+      - name: Checkout source
+        uses: actions/checkout@v2
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
