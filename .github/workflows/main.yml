@@ -40,7 +40,6 @@ jobs:
 
   publish:
     needs: [test,build]
-    name: Publish the extension
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
