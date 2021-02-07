@@ -9,7 +9,7 @@ to open.
 
 ### Help
 This option is always visible.  
-By clicking it, you will be redirected to this README file.
+By clicking it, you will be redirected to this Documentation file.
 
 ### Set max window threshold
 This option is always visible.  
