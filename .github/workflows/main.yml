@@ -1,0 +1,59 @@
+name: Test, build and publish tab-split-merger
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install web-ext
+        run: npm install -g web-ext
+      - name: Test
+        run: web-ext lint
+  
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install web-ext
+        run: npm install -g web-ext
+      - name: Build extension
+        run: web-ext build
+      - name: Store build as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tab-split-merger-build
+          path: web-ext-artifacts
+
+  publish:
+    needs: [test,build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      # has to be validated via addons.mozilla.org for signing / upload success
+      # command is most likely to fail as stated at 
+      # https://extensionworkshop.com/documentation/develop/web-ext-command-reference/
+      # under '--channel'
+      - name: Sign extension
+        run: web-ext sign --api-key ${{ secrets.WEBEXT_API_KEY }} --api-secret ${{ secrets.WEBEXT_API_SECRET }} --id ${{ secrets.WEBEXT_ID }} --channel=listed
