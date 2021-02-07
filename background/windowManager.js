@@ -1,7 +1,7 @@
 import { configManager } from './configManager.js'
 import { menuManager } from './menuManager.js'
 
-export class windowManager {
+class windowManager {
   constructor() {
     // Class attributes
     this.config = new configManager()
