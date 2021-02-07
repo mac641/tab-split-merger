@@ -7,5 +7,4 @@ work, because every window instance is handled as *private browsing*.
 
 Github Actions is most likely to fail while publishing the latest version, 
 because *web-ext* does not quite well support signing new versions of existing 
-apps. Nonetheless it is going to be submitted to Firefox Addon Store for 
-review.
+apps. Nonetheless it is going to be submitted to AMO for review.
