@@ -10,13 +10,13 @@
 **Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/en-US/firefox/addon/tab-split-merger/)**
 
 ## Features :trophy:
-### Main Features 
+### Main Features :tada:
 * Split tabs into multiple windows
 * Merge all windows
 * Move windows to the left / right of the currently active tab into a new 
 window
 
-### Configuration Features
+### Configuration Features :hammer:
 * Choose whether or not pinned tabs will be repinned
 * Configure when you will be prompted for confirmation when splitting tabs 
 into windows
@@ -36,4 +36,5 @@ Check out [docs :book:](docs/docs.md) and [known issues :interrobang:](docs/know
 PRs are very welcome! :)
 
 ## Credits :moneybag:
-Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows)
+Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows).  
+Icon taken from [ICONFINDER](https://www.iconfinder.com/icons/3669388/call_ic_split_icon).
