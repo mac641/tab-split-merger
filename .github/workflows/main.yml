@@ -1,29 +1,58 @@
-name: Build Mozilla Firefox WebExtension
+name: Test, build and publish tab-split-merger
+on: push
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  publish-to-amo:
-    name: Build and publish the extension
-  # The type of runner that the job will run on
+  test:
     runs-on: ubuntu-latest
-
-  # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Pull and checkout source
-        uses: actions/checkout@master
-
-      - name: Build and sign WebExtension
-        uses: Saphareas/sign-web-extension-action@v0.1
+      - name: Install Node.js
+        uses: actions/setup-node@v1
         with:
-          web-ext-id: "{7f59e59d-6ece-4399-9c0d-b98d36c4db8c}"
-          sign-listed: true
-          amo-api-key: "user:15987920:706"
-          amo-api-secret: "0ca7bd81835148b99f0309e193180cf59cc397caa836e0bf8b7de5f1f01d1d2f"
+          node-version: '14.x'
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install web-ext
+        run: npm install -g web-ext
+      - name: Test
+        run: web-ext lint
+  
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install web-ext
+        run: npm install -g web-ext
+      - name: Build extension
+        run: web-ext build
+      - name: Store build as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tab-split-merger-build
+          path: web-ext-artifacts
+
+  publish:
+    needs: [test,build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      # has to be validated via addons.mozilla.org for signing / upload success
+      # command is most likely to fail as stated at 
+      # https://extensionworkshop.com/documentation/develop/web-ext-command-reference/
+      # under '--channel'
+      - name: Sign extension
+        run: web-ext sign --api-key ${{ secrets.WEBEXT_API_KEY }} --api-secret ${{ secrets.WEBEXT_API_SECRET }} --id ${{ secrets.WEBEXT_ID }} --channel=listed
