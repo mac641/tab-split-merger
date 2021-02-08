@@ -1,7 +1,5 @@
 name: Test, build and publish tab-split-merger
-on:
-  pull_request:
-    branches: [ master ]
+on: push
 
 jobs:
   test:
@@ -41,6 +39,7 @@ jobs:
   publish:
     needs: [test,build]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
