@@ -104,7 +104,7 @@ export class menuManager {
         (error) => console.error(error)
       )
     const url =
-      'https://github.com/mac641/tab-split-merger/blob/master/README.md'
+      'https://github.com/mac641/tab-split-merger/blob/master/README.md#further-information'
     browser.tabs.create({
       active: true,
       index: currentTab.index + 1,
