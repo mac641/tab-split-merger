@@ -9,8 +9,8 @@
 
 **Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/en-US/firefox/addon/tab-split-merger/)**
 
-## Features
-### Main Features
+## Features :trophy:
+### Main Features 
 * Split tabs into multiple windows
 * Merge all windows
 * Move windows to the left / right of the currently active tab into a new 
@@ -21,7 +21,7 @@ window
 * Configure when you will be prompted for confirmation when splitting tabs 
 into windows
 
-## Installation
+## Installation :wrench:
 > In Firefox: Open the about:debugging page, click "This Firefox" (in newer 
 versions of Firefox), click "Load Temporary Add-on".
 
@@ -30,10 +30,10 @@ Then navigate to the downloaded directory and select `manifest.json`.
 [MDN: Your first extension](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension)
 
 ## Further information
-Check out [docs](docs/docs.md) and [known issues](docs/known_issues.md).
+Check out [docs :book:](docs/docs.md) and [known issues :interrobang:](docs/known_issues.md).
 
 ## Contributing :bulb:
 PRs are very welcome! :)
 
-## Credits
+## Credits :moneybag:
 Inspired by [jonathanKingston/merge-windows](https://github.com/jonathanKingston/merge-windows)
