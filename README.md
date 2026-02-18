@@ -7,7 +7,7 @@
     <img width="200px" height="200px" src="./icons/split.svg">
 </p>
 
-**Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/en-US/firefox/addon/tab-split-merger/)**
+**Download Link: [Firefox Browser Add-Ons - Tab-Split-Merger](https://addons.mozilla.org/firefox/addon/tab-split-merger/)**
 
 ## Features :trophy:
 ### Main Features :tada:
@@ -27,7 +27,7 @@ versions of Firefox), click "Load Temporary Add-on".
 
 Then navigate to the downloaded directory and select `manifest.json`.
 
-[MDN: Your first extension](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension)
+[MDN: Your first extension](https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension)
 
 ## Further information
 Check out [docs :book:](docs/docs.md) and [known issues :interrobang:](docs/known_issues.md).
